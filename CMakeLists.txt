@@ -11,6 +11,8 @@ find_package(spdlog REQUIRED)
 find_package(tomlplusplus CONFIG REQUIRED)
 find_package(stduuid REQUIRED)
 find_package(asio REQUIRED)
+find_package(CLI11)
+find_package(GTest)
 
 add_subdirectory(src)
 

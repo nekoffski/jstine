@@ -1,4 +1,4 @@
-.PHONY: all build build-release build-debug test clean fmt
+.PHONY: all build build-release build-debug test clean fmt gen_server_errors gen
 
 all: build
 
@@ -23,3 +23,7 @@ test: build-debug
 clean:
 	rm -rf build CMakeUserPresets.json
 
+gen_server_errors:
+	./scripts/gen_errors.py ./conf/errors.in ./src/server/core/ErrorCode.hh
+
+gen: gen_server_errors

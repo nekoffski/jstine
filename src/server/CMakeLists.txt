@@ -1,9 +1,34 @@
 add_library(jstined_lib STATIC
-    "Config.cpp"
+    "Server.cpp"
+    # -- adapters
+    "adapters/asio/AsioServer.cpp"
+    # -- core
+    "core/Config.cpp"
+    "core/Core.cpp"
+    "core/Error.cpp"
+    # "core/FileSystem.cpp"
+    "core/Log.cpp"
+    "core/OS.cpp"
+    "core/Profiler.cpp"
+    "core/String.cpp"
+    # "" runtime
+    "runtime/Thread.cpp"
+
 )
 
-target_link_libraries(jstined_lib PUBLIC jstine_internal)
-target_include_directories(jstined_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(jstined_lib
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(jstined_lib
+    PUBLIC
+        fmt::fmt
+        spdlog::spdlog
+        stduuid::stduuid
+        CLI11::CLI11
+        asio::asio
+)
 
 add_executable(justined "main.cpp")
 target_link_libraries(justined PRIVATE jstined_lib)

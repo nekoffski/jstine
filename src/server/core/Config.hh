@@ -5,12 +5,16 @@
 
 namespace jstine {
 
-class Config : public NonCopyable, public NonMovable {
+class Config {
    public:
-    struct Api {};
+    struct Api {
+        u16 port;
+    };
 
     const Api& api() const;
     Api& api();
+
+    static Config load(int argc, char** argv);
 
    private:
     Api m_api;
