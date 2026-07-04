@@ -6,6 +6,42 @@ namespace jstine::log {
 
 static Level currentLogLevel{Level::trace};
 
+const std::map<std::string, Level>& levelMap() {
+    static const std::map<std::string, Level> map{
+        {"off", Level::off},     {"critical", Level::critical},
+        {"error", Level::error}, {"warn", Level::warn},
+        {"info", Level::info},   {"debug", Level::debug},
+        {"trace", Level::trace},
+    };
+    return map;
+}
+
+Level levelFromString(const Str& levelStr) {
+    const auto& map = levelMap();
+    if (auto it = map.find(levelStr); it != map.end()) {
+        return it->second;
+    }
+    return Level::info;
+}
+
+Str levelToString(Level level) {
+    for (const auto& [key, value] : levelMap()) {
+        if (value == level) {
+            return key;
+        }
+    }
+    return "unknown";
+}
+
+void expect(const Opt<Error>& e) {
+    if (e.has_value()) [[unlikely]] {
+        log::panic(
+            "Unexpected error ({}): {}", fmt::underlying(e->code()),
+            e->message()
+        );
+    }
+}
+
 void init(const LoggerOptions& options) {
     auto colorSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 

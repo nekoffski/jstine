@@ -1,17 +1,18 @@
 add_library(jstined_lib STATIC
     "Server.cpp"
     # -- adapters
+    "adapters/TomlConfigReader.cpp"
     "adapters/asio/AsioServer.cpp"
     # -- core
     "core/Config.cpp"
     "core/Core.cpp"
     "core/Error.cpp"
-    # "core/FileSystem.cpp"
+    "core/FileSystem.cpp"
     "core/Log.cpp"
     "core/OS.cpp"
     "core/Profiler.cpp"
     "core/String.cpp"
-    # "" runtime
+    # -- runtime
     "runtime/Thread.cpp"
 
 )
@@ -28,6 +29,7 @@ target_link_libraries(jstined_lib
         stduuid::stduuid
         CLI11::CLI11
         asio::asio
+        tomlplusplus::tomlplusplus
 )
 
 add_executable(justined "main.cpp")

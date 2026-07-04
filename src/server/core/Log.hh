@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 #include <stdlib.h>
 
+#include <map>
 #include <source_location>
 #include <string_view>
 
@@ -22,6 +23,11 @@ enum class Level {
     debug,
     trace,
 };
+
+const std::map<std::string, Level>& levelMap();
+
+Level levelFromString(const Str& levelStr);
+Str levelToString(Level level);
 
 namespace details {
 
@@ -115,6 +121,18 @@ void expect(bool condition, details::FormatWithLocation fmt, Args&&... args) {
             fmt.loc.funcname
         );
         details::abort(fmt, std::forward<Args>(args)...);
+    }
+}
+
+void expect(const Opt<Error>& e);
+
+template <typename T>
+void expect(const Result<T>& r) {
+    if (not r) [[unlikely]] {
+        log::panic(
+            "Unexpected error: Error code: {}, message: {}",
+            fmt::underlying(r.error().code()), r.error().message()
+        );
     }
 }
 

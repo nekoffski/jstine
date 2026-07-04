@@ -5,6 +5,9 @@ namespace jstine {
 enum class ErrorCode {
     noError = 0,
     badInput = 1,
+    badConfig = 2,
+    fileSystemError = 3,
+    invalidArgument = 4,
 };
 
 }  // namespace jstine

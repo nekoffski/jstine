@@ -8,22 +8,19 @@
 
 namespace jstine {
 
-DEFINE_ERROR(FileSystemError);
-
 class Path {
    public:
     template <typename... Args>
-        requires std::constructible_from<std::string, Args...>
+        requires std::constructible_from<Str, Args...>
     Path(Args&&... args) : m_path(std::forward<Args>(args)...) {}
 
     template <typename... Args>
-    static Path fmt(const std::string& fmt, Args&&... args) {
-        return Path(
-            fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...)
+    static Path fmt(const Str& fmt, Args&&... args) {
+        return Path(fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...)
         );
     }
 
-    const std::string& str() const;
+    const Str& str() const;
 
     bool isFile() const;
     bool isDirectory() const;
@@ -33,11 +30,11 @@ class Path {
 
     static Path join(const Path& base, const Path& relative);
 
-    bool endsWith(const std::string& suffix) const;
-    void append(const std::string& suffix);
+    bool endsWith(const Str& suffix) const;
+    void append(const Str& suffix);
 
    private:
-    std::string m_path;
+    Str m_path;
 };
 
 class File {
@@ -46,13 +43,13 @@ class File {
 
     const Path& path() const;
 
-    void append(const std::string& content);
-    void write(const std::string& content);
-    std::string read() const;
-    std::vector<std::string> readLines() const;
-    std::vector<u32> readBinary() const;
+    Opt<Error> append(const Str& content);
+    Opt<Error> write(const Str& content);
+    Result<Str> read() const;
+    Result<std::vector<Str>> readLines() const;
+    Result<std::vector<u32>> readBinary() const;
 
-    void remove();
+    Opt<Error> remove();
 
    private:
     Path m_path;
@@ -67,10 +64,10 @@ class Directory {
     std::vector<Path> listFiles() const;
     std::vector<Path> listDirectories() const;
 
-    void create();
-    void createSubdirectory(const Path& name);
-    void touch(const Path& name);
-    void remove();
+    Opt<Error> create();
+    Opt<Error> createSubdirectory(const Path& name);
+    Opt<Error> touch(const Path& name);
+    Opt<Error> remove();
 
    private:
     Path m_path;

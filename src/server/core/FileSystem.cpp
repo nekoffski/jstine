@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 
 namespace jstine {
 
-const std::string& Path::str() const { return m_path; }
+const Str& Path::str() const { return m_path; }
 
 bool Path::isFile() const { return fs::is_regular_file(m_path); }
 
@@ -25,84 +25,86 @@ Path Path::join(const Path& base, const Path& relative) {
     return Path{fs::path(base.str()) / fs::path(relative.str())};
 }
 
-bool Path::endsWith(const std::string& suffix) const {
+bool Path::endsWith(const Str& suffix) const {
     if (suffix.size() > m_path.size()) [[unlikely]] {
         return false;
     }
     return std::equal(suffix.rbegin(), suffix.rend(), m_path.rbegin());
 }
 
-void Path::append(const std::string& suffix) { m_path += suffix; }
+void Path::append(const Str& suffix) { m_path += suffix; }
 
 File::File(const Path& path) : m_path(path) {}
 
 const Path& File::path() const { return m_path; }
 
-void File::append(const std::string& content) {
+Opt<Error> File::append(const Str& content) {
     std::ofstream file(m_path.str(), std::ios::app);
     if (not file.is_open()) {
-        throw FileSystemError{
-            ErrorCode::fileNotFound, "Failed to open file for appending: {}",
+        return Error{
+            ErrorCode::fileSystemError, "Failed to open file for appending: {}",
             m_path.str()
         };
     }
     file << content;
+    return Error::empty();
 }
 
-void File::write(const std::string& content) {
+Opt<Error> File::write(const Str& content) {
     std::ofstream file(m_path.str(), std::ios::trunc);
     if (not file.is_open()) {
-        throw FileSystemError{
-            ErrorCode::fileNotFound, "Failed to open file for writing: {}",
+        return Error{
+            ErrorCode::fileSystemError, "Failed to open file for writing: {}",
             m_path.str()
         };
     }
     file << content;
+    return Error::empty();
 }
 
-std::string File::read() const {
+Result<Str> File::read() const {
     std::ifstream file(m_path.str());
     if (not file.is_open()) {
-        throw FileSystemError{
-            ErrorCode::fileNotFound, "Failed to open file for reading: {}",
+        return Error::unexpected(
+            ErrorCode::fileSystemError, "Failed to open file for reading: {}",
             m_path.str()
-        };
+        );
     }
     std::stringstream buffer;
     buffer << file.rdbuf();
     return buffer.str();
 }
 
-std::vector<std::string> File::readLines() const {
+Result<std::vector<Str>> File::readLines() const {
     std::ifstream file(m_path.str());
     if (not file.is_open()) {
-        throw FileSystemError{
-            ErrorCode::fileNotFound, "Failed to open file for reading: {}",
+        return Error::unexpected(
+            ErrorCode::fileSystemError, "Failed to open file for reading: {}",
             m_path.str()
-        };
+        );
     }
-    std::vector<std::string> lines;
-    std::string line;
+    std::vector<Str> lines;
+    Str line;
     while (std::getline(file, line)) {
         lines.push_back(line);
     }
     return lines;
 }
 
-std::vector<u32> File::readBinary() const {
+Result<std::vector<u32>> File::readBinary() const {
     std::ifstream file(m_path.str(), std::ios::binary | std::ios::ate);
     if (not file.is_open()) {
-        throw FileSystemError{
-            ErrorCode::fileNotFound, "Failed to open file '{}' for reading",
+        return Error::unexpected(
+            ErrorCode::fileSystemError, "Failed to open file '{}' for reading",
             m_path.str()
-        };
+        );
     }
     auto size = file.tellg();
     if (size % sizeof(u32) != 0) {
-        throw FileSystemError{
+        return Error::unexpected(
             ErrorCode::invalidArgument,
             "File '{}' size is not a multiple of 4 bytes", m_path.str()
-        };
+        );
     }
     file.seekg(0);
     std::vector<u32> buffer(static_cast<std::size_t>(size) / sizeof(u32));
@@ -110,15 +112,16 @@ std::vector<u32> File::readBinary() const {
     return buffer;
 }
 
-void File::remove() {
+Opt<Error> File::remove() {
     std::error_code ec;
     fs::remove(m_path.str(), ec);
     if (ec) {
-        throw FileSystemError{
+        return Error{
             ErrorCode::fileSystemError, "Failed to remove file '{}'",
             m_path.str()
         };
     }
+    return Error::empty();
 }
 
 Directory::Directory(const Path& path) : m_path(path) {}
@@ -145,51 +148,55 @@ std::vector<Path> Directory::listDirectories() const {
     return directories;
 }
 
-void Directory::create() {
+Opt<Error> Directory::create() {
     std::error_code ec;
     fs::create_directories(m_path.str(), ec);
     if (ec) {
-        throw FileSystemError{
+        return Error{
             ErrorCode::fileSystemError, "Failed to create directory '{}'",
             m_path.str()
         };
     }
+    return Error::empty();
 }
 
-void Directory::remove() {
+Opt<Error> Directory::remove() {
     std::error_code ec;
     fs::remove_all(m_path.str(), ec);
     if (ec) {
-        throw FileSystemError{
+        return Error{
             ErrorCode::fileSystemError, "Failed to remove directory '{}'",
             m_path.str()
         };
     }
+    return Error::empty();
 }
 
-void Directory::createSubdirectory(const Path& name) {
+Opt<Error> Directory::createSubdirectory(const Path& name) {
     const auto subdirPath = Path::join(m_path, name);
     std::error_code ec;
     fs::create_directories(subdirPath.str(), ec);
     if (ec) {
-        throw FileSystemError{
+        return Error{
             ErrorCode::fileSystemError,
             "Failed to create subdirectory '{}' in '{}'", name.str(),
             m_path.str()
         };
     }
+    return Error::empty();
 }
 
-void Directory::touch(const Path& name) {
+Opt<Error> Directory::touch(const Path& name) {
     const auto filePath = Path::join(m_path, name);
     std::ofstream file(filePath.str(), std::ios::app);
     if (not file.is_open()) {
-        throw FileSystemError{
-            ErrorCode::fileNotFound,
+        return Error{
+            ErrorCode::fileSystemError,
             "Failed to create or open file '{}' in '{}'", name.str(),
             m_path.str()
         };
     }
+    return Error::empty();
 }
 
 }  // namespace jstine
