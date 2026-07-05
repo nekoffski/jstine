@@ -8,7 +8,7 @@
 namespace jstine {
 
 class MessageHandler : public NonCopyable, public NonMovable {
-    class Dispatcher {
+    class Dispatcher : public NonCopyable, public NonMovable {
        public:
         explicit Dispatcher(StorageManager& storageManager);
 

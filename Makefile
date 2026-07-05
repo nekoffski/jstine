@@ -1,4 +1,4 @@
-.PHONY: all build build-release build-debug test clean fmt gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install
+.PHONY: all build build-release build-debug test clean fmt gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test
 
 all: build
 
@@ -36,3 +36,6 @@ sdk-python-build:
 
 sdk-python-install:
 	pip install -e ./src/sdk/python
+
+sdk-python-test:
+	cd src/sdk/python && python3 -m unittest discover -s tests

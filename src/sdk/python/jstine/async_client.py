@@ -1,9 +1,20 @@
+from __future__ import annotations
+
 import asyncio
 import struct
 
 from ._codec import Codec, make_codec
-from ._proto import HEADER_SIZE, Protocol, pack_handshake, unpack_handshake
+from ._common import coerce_bytes
+from ._proto import (
+    FieldType,
+    HEADER_SIZE,
+    Protocol,
+    RequestKind,
+    pack_handshake,
+    unpack_handshake,
+)
 from .client import JstineError
+from .errors import ErrorCode
 
 _FRAME_HEADER_SIZE = 8
 _FRAME_HEADER_FMT = "<II"
@@ -24,17 +35,24 @@ class AsyncClient:
         self._codec: Codec | None = None
 
     async def connect(self) -> None:
-        self._reader, self._writer = await asyncio.open_connection(
-            self._host, self._port
-        )
-        await self._handshake()
+        if self._writer is not None:
+            await self.close()
+        try:
+            self._reader, self._writer = await asyncio.open_connection(
+                self._host, self._port
+            )
+            await self._handshake()
+        except Exception:
+            await self.close()
+            raise
 
     async def close(self) -> None:
-        if self._writer:
+        if self._writer is not None:
             self._writer.close()
             await self._writer.wait_closed()
             self._reader = None
             self._writer = None
+        self._codec = None
 
     async def __aenter__(self) -> "AsyncClient":
         await self.connect()
@@ -43,17 +61,86 @@ class AsyncClient:
     async def __aexit__(self, *_) -> None:
         await self.close()
 
-    async def ping(self, payload: bytes = b"") -> bytes:
-        assert self._codec is not None
-        self._send(self._codec.pack_ping(payload))
-        await self._flush()
-        return await self._recv_response()
+    async def ping(
+        self,
+        payload: bytes | bytearray | memoryview | str | int | float = b"",
+    ) -> bytes:
+        payload_bytes = coerce_bytes(payload)
+        return await self._request(
+            RequestKind.ping,
+            [(FieldType.payload, payload_bytes)] if payload_bytes else [],
+        )
+
+    async def set(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+    ) -> bool:
+        await self._request(
+            RequestKind.set,
+            [
+                (FieldType.key, coerce_bytes(key)),
+                (FieldType.value, coerce_bytes(value)),
+            ],
+        )
+        return True
+
+    async def get(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bytes | None:
+        try:
+            return await self._request(
+                RequestKind.get, [(FieldType.key, coerce_bytes(key))]
+            )
+        except JstineError as exc:
+            if exc.code == ErrorCode.notFound:
+                return None
+            raise
+
+    async def delete(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        try:
+            await self._request(
+                RequestKind.delete, [(FieldType.key, coerce_bytes(key))]
+            )
+            return True
+        except JstineError as exc:
+            if exc.code == ErrorCode.notFound:
+                return False
+            raise
+
+    async def del_(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        return await self.delete(key)
+
+    async def exists(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        try:
+            await self._request(
+                RequestKind.exists, [(FieldType.key, coerce_bytes(key))]
+            )
+            return True
+        except JstineError as exc:
+            if exc.code == ErrorCode.notFound:
+                return False
+            raise
 
     async def _handshake(self) -> None:
         self._send(pack_handshake(self._protocol))
         await self._flush()
         self._protocol = unpack_handshake(await self._recv_exact(HEADER_SIZE))
         self._codec = make_codec(self._protocol)
+
+    async def _request(
+        self, kind: RequestKind, fields: list[tuple[FieldType, bytes]]
+    ) -> bytes:
+        assert self._codec is not None
+        self._send(self._codec.pack_request(kind, fields))
+        await self._flush()
+        return await self._recv_response()
 
     def _send(self, data: bytes) -> None:
         assert self._writer is not None

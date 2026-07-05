@@ -1,8 +1,18 @@
+from __future__ import annotations
+
 import socket
 import struct
 
 from ._codec import Codec, make_codec
-from ._proto import HEADER_SIZE, Protocol, pack_handshake, unpack_handshake
+from ._common import coerce_bytes
+from ._proto import (
+    FieldType,
+    HEADER_SIZE,
+    Protocol,
+    RequestKind,
+    pack_handshake,
+    unpack_handshake,
+)
 from .errors import ErrorCode
 
 _FRAME_HEADER_SIZE = 8
@@ -29,14 +39,21 @@ class Client:
         self._codec: Codec | None = None
 
     def connect(self) -> None:
+        if self._sock is not None:
+            self.close()
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._sock.connect((self._host, self._port))
-        self._handshake()
+        try:
+            self._sock.connect((self._host, self._port))
+            self._handshake()
+        except Exception:
+            self.close()
+            raise
 
     def close(self) -> None:
-        if self._sock:
+        if self._sock is not None:
             self._sock.close()
             self._sock = None
+        self._codec = None
 
     def __enter__(self) -> "Client":
         self.connect()
@@ -45,15 +62,84 @@ class Client:
     def __exit__(self, *_) -> None:
         self.close()
 
-    def ping(self, payload: bytes = b"") -> bytes:
-        assert self._codec is not None
-        self._send(self._codec.pack_ping(payload))
-        return self._recv_response()
+    def ping(
+        self,
+        payload: bytes | bytearray | memoryview | str | int | float = b"",
+    ) -> bytes:
+        payload_bytes = coerce_bytes(payload)
+        return self._request(
+            RequestKind.ping,
+            [(FieldType.payload, payload_bytes)] if payload_bytes else [],
+        )
+
+    def set(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+    ) -> bool:
+        self._request(
+            RequestKind.set,
+            [
+                (FieldType.key, coerce_bytes(key)),
+                (FieldType.value, coerce_bytes(value)),
+            ],
+        )
+        return True
+
+    def get(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bytes | None:
+        try:
+            return self._request(
+                RequestKind.get, [(FieldType.key, coerce_bytes(key))]
+            )
+        except JstineError as exc:
+            if exc.code == ErrorCode.notFound:
+                return None
+            raise
+
+    def delete(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        try:
+            self._request(
+                RequestKind.delete, [(FieldType.key, coerce_bytes(key))]
+            )
+            return True
+        except JstineError as exc:
+            if exc.code == ErrorCode.notFound:
+                return False
+            raise
+
+    def del_(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        return self.delete(key)
+
+    def exists(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        try:
+            self._request(
+                RequestKind.exists, [(FieldType.key, coerce_bytes(key))]
+            )
+            return True
+        except JstineError as exc:
+            if exc.code == ErrorCode.notFound:
+                return False
+            raise
 
     def _handshake(self) -> None:
         self._send(pack_handshake(self._protocol))
         self._protocol = unpack_handshake(self._recv_exact(HEADER_SIZE))
         self._codec = make_codec(self._protocol)
+
+    def _request(
+        self, kind: RequestKind, fields: list[tuple[FieldType, bytes]]
+    ) -> bytes:
+        assert self._codec is not None
+        self._send(self._codec.pack_request(kind, fields))
+        return self._recv_response()
 
     def _send(self, data: bytes) -> None:
         assert self._sock is not None

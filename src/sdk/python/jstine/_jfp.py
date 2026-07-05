@@ -1,5 +1,4 @@
 import struct
-from enum import IntEnum
 
 from ._codec import Codec
 from ._proto import FieldType, RequestKind, ResponseKind
@@ -37,14 +36,36 @@ def _unpack_fields(data: bytes) -> list[tuple[FieldType, bytes]]:
 
 
 class JFPCodec(Codec):
+    def pack_request(
+        self, kind: RequestKind, fields: list[tuple[FieldType, bytes]]
+    ) -> bytes:
+        return _pack_request(kind, fields)
+
     def pack_ping(self, payload: bytes) -> bytes:
         fields = [(FieldType.payload, payload)] if payload else []
         return _pack_request(RequestKind.ping, fields)
+
+    def pack_set(self, key: bytes, value: bytes) -> bytes:
+        return _pack_request(
+            RequestKind.set,
+            [(FieldType.key, key), (FieldType.value, value)],
+        )
+
+    def pack_get(self, key: bytes) -> bytes:
+        return _pack_request(RequestKind.get, [(FieldType.key, key)])
+
+    def pack_delete(self, key: bytes) -> bytes:
+        return _pack_request(RequestKind.delete, [(FieldType.key, key)])
+
+    def pack_exists(self, key: bytes) -> bytes:
+        return _pack_request(RequestKind.exists, [(FieldType.key, key)])
 
     def unpack_response(self, data: bytes) -> bytes:
         from .client import JstineError
 
         payload_size, kind_raw = struct.unpack_from(_FRAME_HEADER_FMT, data, 0)
+        if payload_size < 4:
+            raise ValueError(f"Invalid payload size: {payload_size}")
         fields_data = data[_FRAME_HEADER_SIZE: 4 + payload_size]
         kind = ResponseKind(kind_raw)
         fields = _unpack_fields(fields_data)

@@ -1,9 +1,17 @@
 from abc import ABC, abstractmethod
+from typing import TypeAlias
 
-from ._proto import Protocol, RequestKind
+from ._proto import FieldType, Protocol, RequestKind
+
+RequestField: TypeAlias = tuple[FieldType, bytes]
 
 
 class Codec(ABC):
+    @abstractmethod
+    def pack_request(
+        self, kind: RequestKind, fields: list[RequestField]
+    ) -> bytes: ...
+
     @abstractmethod
     def pack_ping(self, payload: bytes) -> bytes: ...
 
