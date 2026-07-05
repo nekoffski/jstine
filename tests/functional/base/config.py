@@ -7,7 +7,7 @@ import tomllib
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
 DEFAULT_CONFIG_PATH = ROOT_DIR / "tests" / "conf" / "functionals.toml"
-DEFAULT_SERVER_CONFIG_PATH = ROOT_DIR / "conf" / "config-template.toml"
+DEFAULT_SERVER_CONFIG_PATH = ROOT_DIR / "tests" / "conf" / "server-config.toml"
 
 
 class ConfigError(ValueError):
@@ -29,7 +29,8 @@ class Config:
     def load(cls, path: Path | str = DEFAULT_CONFIG_PATH) -> "Config":
         config_path = Path(path)
         if not config_path.is_file():
-            raise ConfigError(f"Test config file does not exist: {config_path}")
+            raise ConfigError(
+                f"Test config file does not exist: {config_path}")
 
         raw = config_path.read_text(encoding="utf-8").replace(
             "{cwd}", str(Path.cwd())
@@ -48,7 +49,8 @@ class Config:
         if not binary.is_absolute():
             binary = (ROOT_DIR / binary).resolve()
 
-        config_value = server_data.get("config_path", DEFAULT_SERVER_CONFIG_PATH)
+        config_value = server_data.get(
+            "config_path", DEFAULT_SERVER_CONFIG_PATH)
         if not isinstance(config_value, (str, Path)):
             raise ConfigError("[server].config_path must be a string")
 
@@ -67,4 +69,3 @@ class Config:
                 port=port_value,
             )
         )
-

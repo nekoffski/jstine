@@ -42,3 +42,8 @@ dist/
 
 
 logs
+
+.agents
+.codex
+
+.pytest_cache

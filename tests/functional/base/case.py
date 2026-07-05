@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from jstine import AsyncClient, Client, Protocol
 
@@ -13,6 +14,7 @@ class TestCase(unittest.IsolatedAsyncioTestCase):
 
         self.config = Config.load()
         self.artifacts = TestArtifacts.for_nodeid(self.id())
+        self.artifacts.clear()
 
         if not skip_server:
             self.server = Server(
@@ -24,6 +26,14 @@ class TestCase(unittest.IsolatedAsyncioTestCase):
 
             self.addCleanup(self.server.stop)
             self.server.start()
+
+    def artifact_path(self, name: str = "extra.log") -> Path:
+        return self.artifacts.path(name)
+
+    def write_artifact(self, text: str, name: str = "extra.log") -> Path:
+        path = self.artifact_path(name)
+        self.artifacts.append(path, text)
+        return path
 
     def client(self, host: str = "127.0.0.1", port: int | None = None):
         return Client(

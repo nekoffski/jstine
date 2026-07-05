@@ -2,11 +2,27 @@ from __future__ import annotations
 
 import pytest
 
-from base.system import System
 from base.artifacts import TestArtifacts
+from base.system import System
 
 
 System.os()
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run-benchmarks",
+        action="store_true",
+        default=False,
+        help="run tests marked with benchmark",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "benchmark: tests that are skipped unless --run-benchmarks is set",
+    )
 
 
 def _artifacts_for(item) -> TestArtifacts:
@@ -15,6 +31,18 @@ def _artifacts_for(item) -> TestArtifacts:
         artifacts = TestArtifacts.for_nodeid(item.nodeid)
         item._functional_artifacts = artifacts
     return artifacts
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run-benchmarks"):
+        return
+
+    skip_benchmark = pytest.mark.skip(
+        reason="benchmark tests are skipped by default; pass --run-benchmarks"
+    )
+    for item in items:
+        if "benchmark" in item.keywords:
+            item.add_marker(skip_benchmark)
 
 
 @pytest.hookimpl(hookwrapper=True)

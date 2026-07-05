@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -54,6 +55,16 @@ class TestArtifacts:
     @property
     def pytest_log(self) -> Path:
         return self.root / "pytest.log"
+
+    @property
+    def extra(self) -> Path:
+        return self.root / "extra.log"
+
+    def path(self, name: str) -> Path:
+        return self.root / _sanitize(name)
+
+    def clear(self) -> None:
+        shutil.rmtree(self.root, ignore_errors=True)
 
     def append(self, path: Path, text: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
