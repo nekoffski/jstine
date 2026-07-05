@@ -57,29 +57,60 @@ asio::awaitable<void> AsioSession::start() {
         }
 
         // mock for now!
-        // auto response = Response{ResponseKind::ok};
+        auto response = Response::error(ErrorCode::badInput, "Test message!");
 
-        // if (auto r = co_await writeResponse(response, encoder); not r) {
-        //     logError("send", r.error());
-        //     co_return;
-        // }
+        if (auto err = co_await writeResponse(response, encoder); err) {
+            logError("send", *err);
+            co_return;
+        }
     }
 }
 asio::awaitable<Result<Request>> AsioSession::readRequest(
     RequestDecoder& decoder
 ) {
-    auto bytes = co_await read();
+    for (;;) {
+        if (auto bytes = co_await read(); bytes) {
+            decoder.feed({m_buffer.data(), *bytes});
+        } else {
+            co_return Error::unexpected(bytes.error());
+        }
 
-    if (not bytes) {
-        co_return Error::unexpected(bytes.error());
+        auto request = decoder.decode();
+
+        if (not request) {
+            log::debug(
+                "{} - could not decode request, reason: {}", m_ident,
+                request.error().message()
+            );
+            if (request.error().code() == ErrorCode::requestNotReady) {
+                continue;
+            }
+            co_return Error::unexpected(request.error());
+        }
+
+        log::debug(
+            "{} - successfully decoded request: {}", m_ident,
+            fmt::underlying(request->kind)
+        );
+        co_return request;
     }
-
-    co_return Request{RequestKind::ping, RequestBody{}};
 }
 
-asio::awaitable<Result<Response>> AsioSession::writeResponse(
+asio::awaitable<Opt<Error>> AsioSession::writeResponse(
     const Response& response, ResponseEncoder& encoder
-) {}
+) {
+    auto encodedBytes = encoder.encode(response, m_buffer);
+
+    if (not encodedBytes) {
+        co_return encodedBytes.error();
+    }
+
+    if (auto bytesWritten = co_await write(*encodedBytes); not bytesWritten) {
+        co_return bytesWritten.error();
+    }
+
+    co_return Error::empty();
+}
 
 asio::awaitable<Result<Protocol>> AsioSession::establishProtocol() {
     ProtocolHeader handshake;

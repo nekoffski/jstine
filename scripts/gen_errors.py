@@ -19,10 +19,10 @@ def parse_errors(input_file: str) -> list[tuple[str, str]]:
 def generate_cpp(entries: list[tuple[str, str]]) -> str:
     lines = [
         "#pragma once",
-        "",
+        "#include \"core/Core.hh\"",
         "namespace jstine {",
         "",
-        "enum class ErrorCode {",
+        "enum class ErrorCode : u32 {",
     ]
     for name, value in entries:
         lines.append(f"    {name} = {value},")

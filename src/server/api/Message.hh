@@ -4,6 +4,7 @@
 
 #include "core/Concepts.hh"
 #include "core/Core.hh"
+#include "core/Error.hh"
 
 namespace jstine {
 
@@ -64,6 +65,9 @@ struct Request {
 struct Response {
     ResponseKind kind;
     ResponseBody body;
+
+    static Response error(const Error& err);
+    static Response error(ErrorCode code, const std::string& message);
 };
 
 }  // namespace jstine

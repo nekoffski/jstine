@@ -1,18 +1,12 @@
 import asyncio
+import struct
 
-from ._proto import (
-    FRAME_HEADER_SIZE,
-    HEADER_SIZE,
-    Protocol,
-    RequestKind,
-    ResponseKind,
-    pack_handshake,
-    pack_request,
-    unpack_handshake,
-    unpack_response_header,
-)
+from ._codec import Codec, make_codec
+from ._proto import HEADER_SIZE, Protocol, pack_handshake, unpack_handshake
 from .client import JstineError
-from .errors import ErrorCode
+
+_FRAME_HEADER_SIZE = 8
+_FRAME_HEADER_FMT = "<II"
 
 
 class AsyncClient:
@@ -27,6 +21,7 @@ class AsyncClient:
         self._protocol = protocol
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
+        self._codec: Codec | None = None
 
     async def connect(self) -> None:
         self._reader, self._writer = await asyncio.open_connection(
@@ -49,15 +44,18 @@ class AsyncClient:
         await self.close()
 
     async def ping(self, payload: bytes = b"") -> bytes:
-        self._send(pack_request(RequestKind.ping, payload))
+        assert self._codec is not None
+        print("sending ping")
+        self._send(self._codec.pack_ping(payload))
         await self._flush()
+        print("flush")
         return await self._recv_response()
 
     async def _handshake(self) -> None:
         self._send(pack_handshake(self._protocol))
         await self._flush()
-        data = await self._recv_exact(HEADER_SIZE)
-        self._protocol = unpack_handshake(data)
+        self._protocol = unpack_handshake(await self._recv_exact(HEADER_SIZE))
+        self._codec = make_codec(self._protocol)
 
     def _send(self, data: bytes) -> None:
         assert self._writer is not None
@@ -69,15 +67,14 @@ class AsyncClient:
 
     async def _recv_exact(self, n: int) -> bytes:
         assert self._reader is not None
-        data = await self._reader.readexactly(n)
-        return data
+        return await self._reader.readexactly(n)
 
     async def _recv_response(self) -> bytes:
-        header = await self._recv_exact(FRAME_HEADER_SIZE)
-        kind, length = unpack_response_header(header)
-        payload = await self._recv_exact(length) if length else b""
-        if kind == ResponseKind.error:
-            code = int.from_bytes(payload[:4], "little")
-            message = payload[8:].decode(errors="replace")
-            raise JstineError(ErrorCode(code), message)
-        return payload
+        assert self._codec is not None
+        header = await self._recv_exact(_FRAME_HEADER_SIZE)
+        print("header", header)
+        payload_size, _ = struct.unpack(_FRAME_HEADER_FMT, header)
+        print("payload_size", payload_size)
+        rest = await self._recv_exact(payload_size - 4) if payload_size > 4 else b""
+        print("rest", rest)
+        return self._codec.unpack_response(header + rest)

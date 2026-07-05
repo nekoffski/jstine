@@ -1,8 +1,10 @@
 #pragma once
 
+#include "core/Core.hh"
+
 namespace jstine {
 
-enum class ErrorCode {
+enum class ErrorCode : u32 {
     noError = 0,
     badInput = 1,
     badConfig = 2,

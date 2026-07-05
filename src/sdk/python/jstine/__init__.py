@@ -1,7 +1,7 @@
 from .async_client import AsyncClient
 from .client import Client, JstineError
 from .errors import ErrorCode
-from ._proto import Protocol, RequestKind, ResponseKind
+from ._proto import Protocol, RequestKind, ResponseKind, FieldType
 
 __all__ = [
     "Client",
@@ -11,4 +11,5 @@ __all__ = [
     "Protocol",
     "RequestKind",
     "ResponseKind",
+    "FieldType",
 ]

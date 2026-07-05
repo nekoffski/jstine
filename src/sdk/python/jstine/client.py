@@ -1,17 +1,12 @@
 import socket
+import struct
 
-from ._proto import (
-    FRAME_HEADER_SIZE,
-    HEADER_SIZE,
-    Protocol,
-    RequestKind,
-    ResponseKind,
-    pack_handshake,
-    pack_request,
-    unpack_handshake,
-    unpack_response_header,
-)
+from ._codec import Codec, make_codec
+from ._proto import HEADER_SIZE, Protocol, pack_handshake, unpack_handshake
 from .errors import ErrorCode
+
+_FRAME_HEADER_SIZE = 8
+_FRAME_HEADER_FMT = "<II"
 
 
 class JstineError(Exception):
@@ -31,6 +26,7 @@ class Client:
         self._port = port
         self._protocol = protocol
         self._sock: socket.socket | None = None
+        self._codec: Codec | None = None
 
     def connect(self) -> None:
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,13 +46,14 @@ class Client:
         self.close()
 
     def ping(self, payload: bytes = b"") -> bytes:
-        self._send(pack_request(RequestKind.ping, payload))
+        assert self._codec is not None
+        self._send(self._codec.pack_ping(payload))
         return self._recv_response()
 
     def _handshake(self) -> None:
         self._send(pack_handshake(self._protocol))
-        data = self._recv_exact(HEADER_SIZE)
-        self._protocol = unpack_handshake(data)
+        self._protocol = unpack_handshake(self._recv_exact(HEADER_SIZE))
+        self._codec = make_codec(self._protocol)
 
     def _send(self, data: bytes) -> None:
         assert self._sock is not None
@@ -73,11 +70,8 @@ class Client:
         return bytes(buf)
 
     def _recv_response(self) -> bytes:
-        header = self._recv_exact(FRAME_HEADER_SIZE)
-        kind, length = unpack_response_header(header)
-        payload = self._recv_exact(length) if length else b""
-        if kind == ResponseKind.error:
-            code = int.from_bytes(payload[:4], "little")
-            message = payload[8:].decode(errors="replace")
-            raise JstineError(ErrorCode(code), message)
-        return payload
+        assert self._codec is not None
+        header = self._recv_exact(_FRAME_HEADER_SIZE)
+        payload_size, _ = struct.unpack(_FRAME_HEADER_FMT, header)
+        rest = self._recv_exact(payload_size - 4) if payload_size > 4 else b""
+        return self._codec.unpack_response(header + rest)

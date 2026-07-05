@@ -21,14 +21,14 @@ class AsioSession : public NonCopyable, public NonMovable {
     asio::awaitable<void> start();
 
    private:
-    void logError(const std::string& op, const Error& ec);
+    void logError(const std::string& op, const Error& error);
     void logOp(const std::string& op, u64 bytes);
 
     asio::awaitable<Result<u64>> read();
     asio::awaitable<Result<u64>> write(u64 bytesToWrite);
 
     asio::awaitable<Result<Request>> readRequest(RequestDecoder& decoder);
-    asio::awaitable<Result<Response>> writeResponse(
+    asio::awaitable<Opt<Error>> writeResponse(
         const Response& response, ResponseEncoder& encoder
     );
 

@@ -6,6 +6,9 @@ add_library(jstined_lib STATIC
     "adapters/asio/AsioSession.cpp"
     "adapters/platform/Platform.cpp"
     "adapters/platform/unix/Signal.cpp"
+    # -- api
+    "api/MessageHandler.cpp"
+    "api/Message.cpp"
     # -- core
     "core/Config.cpp"
     "core/Core.cpp"

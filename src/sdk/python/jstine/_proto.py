@@ -8,10 +8,6 @@ HEADER_SIZE = struct.calcsize(_HEADER_FMT)
 MAGIC_REQUEST = 0xDEADBEEF
 MAGIC_RESPONSE = 0xBEEFDEAD
 
-# JFP frame: u32 kind + u32 payload_length
-_FRAME_FMT = "<II"
-FRAME_HEADER_SIZE = struct.calcsize(_FRAME_FMT)
-
 
 class Protocol(IntEnum):
     rsp = 1
@@ -31,6 +27,15 @@ class ResponseKind(IntEnum):
     error = 1
 
 
+# Field type identifiers — must match JFPFieldType in JFP.hh
+class FieldType(IntEnum):
+    payload = 1  # PingRequest payload / OkResponse payload
+    key = 2  # Get/Set/Del/Exists key
+    value = 3  # Set value
+    error_code = 4  # ErrorResponse code (u32 LE)
+    error_message = 5  # ErrorResponse message (utf-8 bytes)
+
+
 def pack_handshake(protocol: Protocol) -> bytes:
     return struct.pack(_HEADER_FMT, int(protocol), MAGIC_REQUEST, bytes(8))
 
@@ -42,14 +47,3 @@ def unpack_handshake(data: bytes) -> Protocol:
     if magic != MAGIC_RESPONSE:
         raise ValueError(f"Unexpected handshake magic: 0x{magic:08X}")
     return Protocol(protocol)
-
-
-def pack_request(kind: RequestKind, payload: bytes = b"") -> bytes:
-    return struct.pack(_FRAME_FMT, int(kind), len(payload)) + payload
-
-
-def unpack_response_header(data: bytes) -> tuple[ResponseKind, int]:
-    if len(data) < FRAME_HEADER_SIZE:
-        raise ValueError(f"Frame header too short: {len(data)}")
-    kind, length = struct.unpack(_FRAME_FMT, data[:FRAME_HEADER_SIZE])
-    return ResponseKind(kind), length
