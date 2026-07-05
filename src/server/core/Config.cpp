@@ -43,6 +43,8 @@ const Config::Log& Config::log() const { return m_log; }
 Config::Api& Config::api() { return m_api; }
 Config::Log& Config::log() { return m_log; }
 
+void logFields(const Config& cfg);
+
 Result<Config> Config::load(
     int argc, char** argv, const ConfigFileReader& reader
 ) {
@@ -59,6 +61,8 @@ Result<Config> Config::load(
     }
 
     cfg.overrideFields(argc, argv);
+
+    logFields(cfg);
     return cfg;
 }
 
@@ -75,8 +79,9 @@ void Config::overrideFields(int argc, char** argv) {
 }
 
 void logFields(const Config& cfg) {
-    log::info("api.port = {}", cfg.api().port);
-    log::info("log.level = {}", log::levelToString(cfg.log().level));
+    log::info("loaded config:");
+    log::info("\tapi.port = {}", cfg.api().port);
+    log::info("\tlog.level = {}", log::levelToString(cfg.log().level));
 }
 
 }  // namespace jstine

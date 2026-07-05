@@ -1,0 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jstine-sdk"
+version = "0.1.0"
+description = "jstine client SDK"
+requires-python = ">=3.11"
+
+[tool.hatch.build.targets.wheel]
+packages = ["jstine"]

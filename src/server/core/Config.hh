@@ -44,6 +44,5 @@ class Config {
     Log m_log;
 };
 
-void logFields(const Config& cfg);
 
 }  // namespace jstine

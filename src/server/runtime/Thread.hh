@@ -5,6 +5,7 @@
 
 #include "core/Concepts.hh"
 #include "core/Core.hh"
+#include "core/Error.hh"
 
 namespace jstine {
 
@@ -16,6 +17,7 @@ class Thread : public NonCopyable, public NonMovable {
     void join();
 
     virtual void cancel() {}
+    [[nodiscard]] virtual Opt<Error> init();
 
    protected:
     void sleepFor(std::chrono::milliseconds duration);
@@ -28,7 +30,7 @@ class Thread : public NonCopyable, public NonMovable {
 
 class ThreadGroup : public NonCopyable, public NonMovable {
    public:
-    void start();
+    [[nodiscard]] Opt<Error> start();
     void join();
     void cancel();
 

@@ -8,6 +8,11 @@ enum class ErrorCode {
     badConfig = 2,
     fileSystemError = 3,
     invalidArgument = 4,
+    osError = 5,
+    handshakeFailure = 6,
+    requestNotReady = 7,
+    eof = 8,
+    connectionFailure = 9,
 };
 
 }  // namespace jstine

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <vector>
 
 namespace jstine {
 
@@ -26,6 +27,9 @@ using i8 = int8_t;
 using f32 = float;
 using f64 = double;
 using Str = std::string;
+
+using Byte = u8;
+using Bytes = std::vector<Byte>;
 
 template <typename T>
 T max() {

@@ -23,16 +23,24 @@ void Thread::join() {
     }
 }
 
+Opt<Error> Thread::init() { return Error::empty(); }
+
 void Thread::sleepFor(std::chrono::milliseconds duration) {
     std::this_thread::sleep_for(duration);
 }
 
 Thread::~Thread() { join(); }
 
-void ThreadGroup::start() {
+Opt<Error> ThreadGroup::start() {
+    for (auto& thread : m_threads) {
+        if (auto err = thread->init(); err) {
+            return err;
+        }
+    }
     for (auto& thread : m_threads) {
         thread->start();
     }
+    return Error::empty();
 }
 
 void ThreadGroup::join() {

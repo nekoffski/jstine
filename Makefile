@@ -1,4 +1,4 @@
-.PHONY: all build build-release build-debug test clean fmt gen_server_errors gen
+.PHONY: all build build-release build-debug test clean fmt gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install
 
 all: build
 
@@ -26,4 +26,13 @@ clean:
 gen_server_errors:
 	./scripts/gen_errors.py ./conf/errors.in ./src/server/core/ErrorCode.hh
 
-gen: gen_server_errors
+gen_python_errors:
+	./scripts/gen_errors.py ./conf/errors.in ./src/sdk/python/jstine/errors.py --lang python
+
+gen: gen_server_errors gen_python_errors
+
+sdk-python-build:
+	pip wheel ./src/sdk/python --no-deps -w dist/
+
+sdk-python-install:
+	pip install -e ./src/sdk/python

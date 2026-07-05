@@ -32,4 +32,10 @@ TODO.md
 DESIGN.md
 
 __pycache__
-venv
+
+# Python SDK
+dist/
+*.egg-info/
+*.whl
+.venv/
+

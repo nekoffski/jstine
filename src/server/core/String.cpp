@@ -41,7 +41,7 @@ std::optional<std::string> extensionFromPath(
     return {};
 }
 
-std::string toBinaryString(std::span<const u8> bytes) {
+std::string toBinaryString(std::span<const Byte> bytes) {
     std::string result;
     result.reserve(bytes.size() * 8);
     for (const auto byte : bytes) {
@@ -50,13 +50,28 @@ std::string toBinaryString(std::span<const u8> bytes) {
     return result;
 }
 
-std::string toHexString(std::span<const u8> bytes) {
+std::string toHexString(std::span<const Byte> bytes) {
     std::string result;
     result.reserve(bytes.size() * 2);
     for (const auto byte : bytes) {
         result += fmt::format("{:02x}", byte);
     }
     return result;
+}
+
+std::string hexDump(std::span<const Byte> bytes) {
+    std::string hex;
+    std::string ascii;
+    hex.reserve(bytes.size() * 3);
+    ascii.reserve(bytes.size());
+    for (const auto byte : bytes) {
+        hex += fmt::format("{:02x} ", byte);
+        ascii += (byte >= 0x20 && byte < 0x7f) ? static_cast<char>(byte) : '.';
+    }
+    if (!hex.empty()) {
+        hex.pop_back();
+    }
+    return fmt::format("{} | {}", hex, ascii);
 }
 
 }  // namespace jstine

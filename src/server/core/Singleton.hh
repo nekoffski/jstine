@@ -21,12 +21,18 @@ template <typename T>
 class UniqueInstance : public virtual NonMovable, public virtual NonCopyable {
    public:
     explicit UniqueInstance() {
-        log::expect(not s_instanceExists, "Instance already exists");
-        s_instanceExists = true;
+        log::expect(not s_instance, "Instance already exists");
+        s_instance = static_cast<T*>(this);
+    }
+
+   protected:
+    static T& instance() {
+        log::expect(s_instance, "Instance does not exist");
+        return *s_instance;
     }
 
    private:
-    inline static bool s_instanceExists = false;
+    inline static T* s_instance = nullptr;
 };
 
 }  // namespace jstine

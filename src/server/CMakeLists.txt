@@ -3,6 +3,9 @@ add_library(jstined_lib STATIC
     # -- adapters
     "adapters/TomlConfigReader.cpp"
     "adapters/asio/AsioServer.cpp"
+    "adapters/asio/AsioSession.cpp"
+    "adapters/platform/Platform.cpp"
+    "adapters/platform/unix/Signal.cpp"
     # -- core
     "core/Config.cpp"
     "core/Core.cpp"
@@ -14,6 +17,12 @@ add_library(jstined_lib STATIC
     "core/String.cpp"
     # -- runtime
     "runtime/Thread.cpp"
+    "runtime/Signal.cpp"
+    # -- proto
+    "proto/MessageCodec.cpp"
+    "proto/Protocol.cpp"
+    "proto/impl/RESP.cpp"
+    "proto/impl/JFP.cpp"
 
 )
 

@@ -18,7 +18,7 @@ enum class OS {
     darwin,
 };
 
-inline constexpr OS os() {
+inline constexpr OS detectOs() {
 #ifdef JSTINE_PLATFORM_WINDOWS
     return OS::windows;
 #elif defined(JSTINE_PLATFORM_DARWIN)

@@ -1,15 +1,18 @@
 #pragma once
 
+#include <variant>
+
+#include "core/Concepts.hh"
+#include "core/Core.hh"
+
 namespace jstine {
 
 enum class RequestKind {
-    noop = 0,
-    health = 1,
-    put = 2,
-    insert = 3,
-    get = 4,
+    ping = 1,
+    set = 2,
+    get = 3,
+    del = 4,
     exists = 5,
-    remove = 6,
 };
 
 enum class ResponseKind {
@@ -17,12 +20,50 @@ enum class ResponseKind {
     error = 1,
 };
 
+struct PingRequestBody {
+    Bytes payload;
+};
+
+struct SetRequestBody {
+    Bytes key;
+    Bytes value;
+};
+
+struct GetRequestBody {
+    Bytes key;
+};
+
+struct DelRequestBody {
+    Bytes key;
+};
+
+struct ExistsRequestBody {
+    Bytes key;
+};
+
+using RequestBody = std::variant<
+    PingRequestBody, SetRequestBody, GetRequestBody, DelRequestBody,
+    ExistsRequestBody>;
+
+struct OkResponseBody {
+    Bytes payload;
+};
+
+struct ErrorResponseBody {
+    u32 code;
+    Bytes message;
+};
+
+using ResponseBody = std::variant<OkResponseBody, ErrorResponseBody>;
+
 struct Request {
     RequestKind kind;
+    RequestBody body;
 };
 
 struct Response {
     ResponseKind kind;
+    ResponseBody body;
 };
 
 }  // namespace jstine
