@@ -16,3 +16,4 @@ class ErrorCode(IntEnum):
     eof = 8
     connectionFailure = 9
     notImplementedYet = 10
+    notFound = 11

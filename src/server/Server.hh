@@ -7,6 +7,7 @@
 #include "core/Singleton.hh"
 #include "runtime/Signal.hh"
 #include "runtime/Thread.hh"
+#include "storage/StorageManager.hh"
 
 namespace jstine {
 
@@ -32,6 +33,7 @@ class Server : public UniqueInstance<Server> {
     ServerContext m_context;
     ThreadGroup m_threadGroup;
     MessageHandler m_messageHandler;
+    StorageManager m_storageManager;
 };
 
 }  // namespace jstine

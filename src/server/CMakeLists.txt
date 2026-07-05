@@ -26,6 +26,8 @@ add_library(jstined_lib STATIC
     "proto/Protocol.cpp"
     "proto/impl/RESP.cpp"
     "proto/impl/JFP.cpp"
+    # -- storage
+    "storage/StorageManager.cpp"
 
 )
 
