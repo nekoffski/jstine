@@ -38,4 +38,7 @@ dist/
 *.egg-info/
 *.whl
 .venv/
+.test-venv/
 
+
+logs

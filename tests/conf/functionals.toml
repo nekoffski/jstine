@@ -1,0 +1,2 @@
+[server]
+binary = "{cwd}/build/Debug/src/server/justined"
