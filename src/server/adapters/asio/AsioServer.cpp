@@ -4,8 +4,10 @@
 
 namespace jstine {
 
-AsioServer::AsioServer(const Config& cfg)
-    : m_cfg(cfg), m_acceptor(m_io, {asio::ip::tcp::v4(), cfg.api().port}) {}
+AsioServer::AsioServer(const Config& cfg, MessageHandler& handler)
+    : m_cfg(cfg),
+      m_messageHandler(handler),
+      m_acceptor(m_io, {asio::ip::tcp::v4(), cfg.api().port}) {}
 
 void AsioServer::run() {
     asio::co_spawn(
@@ -35,8 +37,9 @@ asio::awaitable<void> AsioServer::acceptConnection() {
 
     asio::co_spawn(
         ex,
-        [s = std::move(socket)]() mutable -> asio::awaitable<void> {
-            co_return co_await AsioSession{std::move(s)}.start();
+        [&, s = std::move(socket)]() mutable -> asio::awaitable<void> {
+            AsioSession session{std::move(s), m_messageHandler};
+            co_return co_await session.start();
         },
         asio::detached
     );

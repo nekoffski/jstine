@@ -24,7 +24,7 @@ Opt<Error> Server::run() {
 }
 
 void Server::buildServices() {
-    m_threadGroup.add<AsioServer>(m_context.config);
+    m_threadGroup.add<AsioServer>(m_context.config, m_messageHandler);
 }
 
 Opt<Error> Server::initSignals() {

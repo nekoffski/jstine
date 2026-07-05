@@ -23,4 +23,8 @@ Response Response::error(ErrorCode code, const std::string& message) {
     };
 }
 
+Response Response::ok(const Bytes& payload) {
+    return Response{ResponseKind::ok, OkResponseBody{payload}};
+}
+
 }  // namespace jstine

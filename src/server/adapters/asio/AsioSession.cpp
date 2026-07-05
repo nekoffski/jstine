@@ -26,8 +26,10 @@ Error convertError(const std::error_code& ec) {
 
 }  // namespace
 
-AsioSession::AsioSession(asio::ip::tcp::socket socket)
-    : m_socket(std::move(socket)), m_ident(extractIdent(m_socket)) {}
+AsioSession::AsioSession(asio::ip::tcp::socket socket, MessageHandler& handler)
+    : m_socket(std::move(socket)),
+      m_ident(extractIdent(m_socket)),
+      m_messageHandler(handler) {}
 
 asio::awaitable<void> AsioSession::start() {
     log::info("{} - session started", m_ident);
@@ -56,8 +58,7 @@ asio::awaitable<void> AsioSession::start() {
             co_return;
         }
 
-        // mock for now!
-        auto response = Response::error(ErrorCode::badInput, "Test message!");
+        auto response = m_messageHandler.onRequest(*request);
 
         if (auto err = co_await writeResponse(response, encoder); err) {
             logError("send", *err);

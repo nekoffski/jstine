@@ -44,8 +44,6 @@ class JFPCodec(Codec):
     def unpack_response(self, data: bytes) -> bytes:
         from .client import JstineError
 
-        print("wtf?", data.decode('utf-8'))
-
         payload_size, kind_raw = struct.unpack_from(_FRAME_HEADER_FMT, data, 0)
         fields_data = data[_FRAME_HEADER_SIZE: 4 + payload_size]
         kind = ResponseKind(kind_raw)

@@ -15,3 +15,4 @@ class ErrorCode(IntEnum):
     requestNotReady = 7
     eof = 8
     connectionFailure = 9
+    notImplementedYet = 10

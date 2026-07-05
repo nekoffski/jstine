@@ -45,10 +45,8 @@ class AsyncClient:
 
     async def ping(self, payload: bytes = b"") -> bytes:
         assert self._codec is not None
-        print("sending ping")
         self._send(self._codec.pack_ping(payload))
         await self._flush()
-        print("flush")
         return await self._recv_response()
 
     async def _handshake(self) -> None:
@@ -72,9 +70,6 @@ class AsyncClient:
     async def _recv_response(self) -> bytes:
         assert self._codec is not None
         header = await self._recv_exact(_FRAME_HEADER_SIZE)
-        print("header", header)
         payload_size, _ = struct.unpack(_FRAME_HEADER_FMT, header)
-        print("payload_size", payload_size)
         rest = await self._recv_exact(payload_size - 4) if payload_size > 4 else b""
-        print("rest", rest)
         return self._codec.unpack_response(header + rest)

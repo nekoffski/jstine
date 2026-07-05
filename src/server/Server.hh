@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/MessageHandler.hh"
 #include "core/Concepts.hh"
 #include "core/Config.hh"
 #include "core/Core.hh"
@@ -30,6 +31,7 @@ class Server : public UniqueInstance<Server> {
 
     ServerContext m_context;
     ThreadGroup m_threadGroup;
+    MessageHandler m_messageHandler;
 };
 
 }  // namespace jstine

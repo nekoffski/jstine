@@ -1,7 +1,5 @@
 #pragma once
-
 #include "core/Core.hh"
-
 namespace jstine {
 
 enum class ErrorCode : u32 {
@@ -15,6 +13,7 @@ enum class ErrorCode : u32 {
     requestNotReady = 7,
     eof = 8,
     connectionFailure = 9,
+    notImplementedYet = 10,
 };
 
 }  // namespace jstine

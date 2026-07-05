@@ -4,6 +4,7 @@
 
 #include "Asio.hh"
 #include "api/Message.hh"
+#include "api/MessageHandler.hh"
 #include "core/Concepts.hh"
 #include "core/Core.hh"
 #include "proto/Protocol.hh"
@@ -16,7 +17,7 @@ class AsioSession : public NonCopyable, public NonMovable {
    public:
     using Buffer = std::array<Byte, 1024>;
 
-    explicit AsioSession(asio::ip::tcp::socket socket);
+    explicit AsioSession(asio::ip::tcp::socket socket, MessageHandler& handler);
 
     asio::awaitable<void> start();
 
@@ -36,6 +37,7 @@ class AsioSession : public NonCopyable, public NonMovable {
 
     asio::ip::tcp::socket m_socket;
     Str m_ident;
+    MessageHandler& m_messageHandler;
     Buffer m_buffer;
 };
 

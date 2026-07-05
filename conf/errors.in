@@ -8,3 +8,4 @@ handshakeFailure = 6
 requestNotReady = 7
 eof = 8
 connectionFailure = 9
+notImplementedYet = 10
