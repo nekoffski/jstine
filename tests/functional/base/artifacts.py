@@ -10,7 +10,10 @@ LOGS_ROOT = Path.cwd() / "logs"
 
 def canonical_test_name(name: str) -> str:
     name = name.replace("::", ".").replace("/", ".").replace("\\", ".")
-    return re.sub(r"\.py(?=\.|$)", "", name)
+    name = re.sub(r"\.py(?=\.|$)", "", name)
+    if name.startswith("tests.functional."):
+        name = name.removeprefix("tests.functional.")
+    return name
 
 
 def _sanitize(name: str) -> str:
@@ -41,6 +44,14 @@ class TestArtifacts:
         return self.root / "server.stderr.log"
 
     @property
+    def server_metrics(self) -> Path:
+        return self.root / "server.metrics.json"
+
+    @property
+    def server_metrics_report(self) -> Path:
+        return self.root / "server.metrics.txt"
+
+    @property
     def pytest_log(self) -> Path:
         return self.root / "pytest.log"
 
@@ -50,4 +61,3 @@ class TestArtifacts:
             fh.write(text)
             if text and not text.endswith("\n"):
                 fh.write("\n")
-

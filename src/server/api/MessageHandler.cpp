@@ -26,9 +26,11 @@ Response MessageHandler::Dispatcher::operator()(const SetRequestBody& body) {
 }
 
 Response MessageHandler::Dispatcher::operator()(const GetRequestBody& body) {
-    return Response::error(
-        ErrorCode::notImplementedYet, "Get request not implemented yet"
-    );
+    if (auto value = m_storageManager.get(body.key); value) {
+        return Response::ok(*value);
+    } else {
+        return Response::error(value.error());
+    }
 }
 
 Response MessageHandler::Dispatcher::operator()(const DelRequestBody& body) {

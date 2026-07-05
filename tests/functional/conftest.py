@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import pytest
 
+from base.system import System
 from base.artifacts import TestArtifacts
+
+
+System.os()
 
 
 def _artifacts_for(item) -> TestArtifacts:

@@ -4,8 +4,8 @@ import asyncio
 
 async def main():
     async with jstine.AsyncClient(port=9991) as c:
-        pong = await c.ping(payload=b"Hello world!")
-        print(pong)
+        resp = await c.set(key=b"foo", value=b"bar")
+        print(resp)
 
 
 asyncio.run(main())
