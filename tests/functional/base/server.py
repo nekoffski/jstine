@@ -111,6 +111,11 @@ class Server:
             return
 
         self._metrics.sample()
+        self._metrics.finish()
+        self._metrics_stop.set()
+        if self._metrics_thread is not None:
+            self._metrics_thread.join(timeout=5.0)
+            self._metrics_thread = None
 
         if self.process.poll() is None:
             try:
@@ -131,13 +136,6 @@ class Server:
                     self.process.kill()
                 self.process.wait(timeout=5.0)
 
-        self._metrics.sample()
-        self._metrics.finish()
-        self._metrics_stop.set()
-        if self._metrics_thread is not None:
-            self._metrics_thread.join(timeout=5.0)
-            self._metrics_thread = None
-
         if self.artifacts is not None:
             self._metrics.write_json(self.artifacts.server_metrics)
             self._metrics.write_report(self.artifacts.server_metrics_report)
@@ -151,4 +149,3 @@ class Server:
             self._stderr = None
 
         self.process = None
-

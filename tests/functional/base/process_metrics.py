@@ -5,6 +5,7 @@ import os
 import subprocess
 import threading
 import time
+import psutil
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -226,37 +227,17 @@ class ProcessMetrics:
 
     @staticmethod
     def _read_darwin_snapshot(pid: int) -> ProcessSnapshot:
-        result = subprocess.run(
-            [
-                "ps",
-                "-p",
-                str(pid),
-                "-o",
-                "utime=",
-                "-o",
-                "stime=",
-                "-o",
-                "rss=",
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        p = psutil.Process(pid)
 
-        line = result.stdout.strip()
-        if not line:
-            raise OSError(f"Process {pid} disappeared before snapshotting")
-
-        parts = line.split()
-        if len(parts) != 3:
-            raise OSError(f"Unexpected ps output for pid {pid}: {line!r}")
+        cpu = p.cpu_times()
+        mem = p.memory_info()
 
         return ProcessSnapshot(
             timestamp_monotonic=time.monotonic(),
-            user_time_s=_parse_cpu_time(parts[0]),
-            system_time_s=_parse_cpu_time(parts[1]),
-            rss_kib=int(parts[2]),
-            peak_rss_kib=int(parts[2]),
+            user_time_s=cpu.user,
+            system_time_s=cpu.system,
+            rss_kib=mem.rss // 1024,
+            peak_rss_kib=mem.rss // 1024,  # psutil does not expose peak RSS on macOS
         )
 
 
