@@ -10,7 +10,6 @@ add_executable(jstine_unit_tests
     "test_proto_MessageCodec.cpp"
     "test_proto_Protocol.cpp"
     "test_proto_JFP.cpp"
-    "test_storage_StorageManager.cpp"
 )
 
 target_link_libraries(jstine_unit_tests

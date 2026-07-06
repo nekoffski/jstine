@@ -32,8 +32,8 @@ class Server : public UniqueInstance<Server> {
 
     ServerContext m_context;
     ThreadGroup m_threadGroup;
+    std::unique_ptr<StorageManager> m_storageManager;
     MessageHandler m_messageHandler;
-    StorageManager m_storageManager;
 };
 
 }  // namespace jstine

@@ -28,6 +28,7 @@ add_library(jstined_lib STATIC
     "proto/impl/JFP.cpp"
     # -- storage
     "storage/StorageManager.cpp"
+    "storage/std/StdStorageManager.cpp"
 
 )
 
@@ -46,5 +47,5 @@ target_link_libraries(jstined_lib
         tomlplusplus::tomlplusplus
 )
 
-add_executable(justined "main.cpp")
-target_link_libraries(justined PRIVATE jstined_lib)
+add_executable(jstined "main.cpp")
+target_link_libraries(jstined PRIVATE jstined_lib)
