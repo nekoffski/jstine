@@ -11,7 +11,7 @@ from assertpy import assert_that
 
 @pytest.mark.benchmark
 class BenchmarkLoadSetGet(TestCase):
-    BENCHMARK_DURATION = 20
+    BENCHMARK_DURATION = 120
 
     def setUp(self):
         super().setUp()
@@ -33,7 +33,7 @@ class BenchmarkLoadSetGet(TestCase):
             i = 0
             while True:
                 yield f"{prefix}:{index}:{i}"
-                i += 1
+                i += 1 % 100
 
         task = asyncio.create_task(
             self.set_worker(gen(0, "key"), gen(0, "value"), 0)

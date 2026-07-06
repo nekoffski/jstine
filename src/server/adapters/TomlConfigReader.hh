@@ -10,4 +10,3 @@ class TomlConfigReader : public ConfigFileReader {
 };
 
 }  // namespace jstine
-            

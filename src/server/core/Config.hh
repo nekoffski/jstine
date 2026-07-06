@@ -44,5 +44,4 @@ class Config {
     Log m_log;
 };
 
-
 }  // namespace jstine
