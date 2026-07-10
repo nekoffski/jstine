@@ -21,6 +21,8 @@ Result<i32> toUnixSignal(Signal signal) {
             return SIGQUIT;
         case Signal::kill:
             return SIGKILL;
+        case Signal::count:
+            break;
     }
     return Error::unexpected(
         ErrorCode::invalidArgument, "Invalid signal value: {}",
@@ -63,7 +65,7 @@ Opt<Error> UnixSignalManager::registerHandler(Signal signal, Handler handler) {
 
     log::info("registering handler for signal: {}", unixSignal.value());
 
-    struct sigaction sa {};
+    struct sigaction sa{};
     sa.sa_handler = [](i32 signum) {
         auto internalSignal = fromUnixSignal(signum);
 
@@ -111,7 +113,7 @@ void UnixSignalManager::removeHandler(Signal signal) {
         return;
     }
 
-    struct sigaction sa {};
+    struct sigaction sa{};
     sa.sa_handler = SIG_DFL;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;

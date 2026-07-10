@@ -20,10 +20,10 @@ Opt<Error> StdStorageManager::set(const Key& key, const Value& value) {
 
 Result<Value> StdStorageManager::get(const Key& key) const {
     std::shared_lock lk{m_storageMutex};
-    if (not m_storage.contains(key)) {
-        return Error::unexpected(ErrorCode::notFound, "Key does not exist");
+    if (auto it = m_storage.find(key); it != m_storage.end()) {
+        return it->second;
     }
-    return m_storage.at(key);
+    return Error::unexpected(ErrorCode::notFound, "Key does not exist");
 }
 
 }  // namespace jstine

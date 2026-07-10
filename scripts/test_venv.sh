@@ -5,7 +5,7 @@ if [ ! -d .test-venv ]; then
 fi
 
 source .test-venv/bin/activate
-python -m pip install -r ./tests/conf/test-requirements.txt
+python -m pip install -r ./test-requirements.txt
 
 pip wheel ./src/sdk/python --no-deps -w dist/
 pip install -e ./src/sdk/python

@@ -5,4 +5,4 @@ if [ ! -d .venv ]; then
 fi
 
 source .venv/bin/activate
-python -m pip install -r ./conf/requirements.txt
+python -m pip install -r ./requirements.txt
