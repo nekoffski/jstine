@@ -89,7 +89,7 @@ jobs:
           path: build/Debug
 
       - name: Restore server binary permissions
-        run: chmod +x build/Debug/src/server/jstined build/Debug/src/server/justined
+        run: chmod +x build/Debug/src/server/jstined
 
       - name: Prepare scripts
         run: chmod +x scripts/*.sh
