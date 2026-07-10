@@ -16,6 +16,14 @@ TEST(MessageTests, ResponseOkPreservesPayload) {
     EXPECT_EQ(std::get<OkResponseBody>(response.body).payload, payload);
 }
 
+TEST(MessageTests, ResponseOkDefaultsToEmptyPayload) {
+    const Response response = Response::ok();
+
+    EXPECT_EQ(response.kind, ResponseKind::ok);
+    ASSERT_TRUE(std::holds_alternative<OkResponseBody>(response.body));
+    EXPECT_TRUE(std::get<OkResponseBody>(response.body).payload.empty());
+}
+
 TEST(MessageTests, ResponseErrorFromCodeAndMessage) {
     const Response response = Response::error(ErrorCode::badInput, "bad input");
 
@@ -24,6 +32,16 @@ TEST(MessageTests, ResponseErrorFromCodeAndMessage) {
     const auto& body = std::get<ErrorResponseBody>(response.body);
     EXPECT_EQ(body.code, static_cast<u32>(ErrorCode::badInput));
     EXPECT_EQ(body.message, Bytes({'b', 'a', 'd', ' ', 'i', 'n', 'p', 'u', 't'}));
+}
+
+TEST(MessageTests, ResponseErrorFromCodeCanCarryEmptyMessage) {
+    const Response response = Response::error(ErrorCode::badInput, "");
+
+    EXPECT_EQ(response.kind, ResponseKind::error);
+    ASSERT_TRUE(std::holds_alternative<ErrorResponseBody>(response.body));
+    const auto& body = std::get<ErrorResponseBody>(response.body);
+    EXPECT_EQ(body.code, static_cast<u32>(ErrorCode::badInput));
+    EXPECT_TRUE(body.message.empty());
 }
 
 TEST(MessageTests, ResponseErrorFromErrorObject) {

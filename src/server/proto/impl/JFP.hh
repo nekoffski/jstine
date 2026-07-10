@@ -6,17 +6,29 @@
 
 namespace jstine {
 
-// JFP wire format:
-//   Frame = [u32 payload_size][u32 kind][Field...]
-//   Field = [u8 type][u32 size][data...]
-//   payload_size = 4(kind) + sum(5 + field.size)
+// JFP is a length-prefixed binary protocol.
 //
-// Field types:
-//   1 = payload       PingRequest payload / OkResponse payload
-//   2 = key           Get/Set/Del/Exists key
-//   3 = value         Set value
-//   4 = error_code    ErrorResponse code (u32 LE)
-//   5 = error_message ErrorResponse message (utf-8 bytes)
+// Request/response frames share the same outer shape:
+//   frame = [u32 payload_size][u32 kind][field...]
+//
+// `payload_size` counts bytes after the size prefix itself. In other words:
+//   payload_size = 4(kind) + sum(field_header + field_data)
+//
+// Each field is encoded as:
+//   field = [u8 type][u32 size][size bytes of payload]
+//
+// The field type determines how the payload is interpreted:
+//   1 = payload       Ping request payload / Ok response payload
+//   2 = key           Key used by get/set/delete/exists
+//   3 = value         Value used by set
+//   4 = error_code    Error response code, little-endian u32
+//   5 = error_message Error response message, utf-8 bytes
+//
+// The decoder accepts incremental feeds:
+// - `feed()` appends raw bytes to an internal buffer
+// - `decode()` returns `requestNotReady` until one full frame is available
+// - once a full frame exists, it consumes exactly one request from the buffer
+//   and leaves any trailing bytes for the next `decode()` call
 
 enum class JFPFieldType : u8 {
     payload = 1,

@@ -1,0 +1,95 @@
+name: jstine post push ci
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: git ls-files '*.cpp' '*.hh' '*.h' | xargs -r clang-format --dry-run --Werror
+
+  build:
+    name: Debug build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Conan
+        uses: conan-io/setup-conan@v1
+        with:
+          cache_packages: true
+
+      - name: Build debug target
+        run: make build-debug
+
+      - name: Upload debug build
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-build
+          path: build/Debug
+          if-no-files-found: error
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download debug build
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-build
+          path: build/Debug
+
+      - name: Run unit tests
+        working-directory: build/Debug
+        run: ctest --output-on-failure
+
+  functional:
+    name: Functional tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download debug build
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-build
+          path: build/Debug
+
+      - name: Prepare scripts
+        run: chmod +x scripts/*.sh
+
+      - name: Install test environment
+        run: ./scripts/test_venv.sh
+
+      - name: Run functional tests
+        run: ./scripts/run_functionals.sh

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstring>
+#include <variant>
 #include <span>
 
 #include "proto/MessageCodec.hh"
@@ -14,6 +15,17 @@ TEST(MessageCodecTests, ConstructsJfpCodecWithMatchingProtocol) {
 
     EXPECT_EQ(codec.protocol(), Protocol::jfp);
     EXPECT_EQ(protocolToStr(codec.protocol()), "jfp");
+}
+
+TEST(MessageCodecTests, JfpCodecProvidesConcreteDecoderAndEncoder) {
+    MessageCodec codec{Protocol::jfp};
+
+    JFPRequestDecoder& decoder = dynamic_cast<JFPRequestDecoder&>(codec.decoder());
+    JFPResponseEncoder& encoder =
+        dynamic_cast<JFPResponseEncoder&>(codec.encoder());
+
+    EXPECT_EQ(&decoder, &codec.decoder());
+    EXPECT_EQ(&encoder, &codec.encoder());
 }
 
 TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
