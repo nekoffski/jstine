@@ -31,7 +31,9 @@ TEST(MessageTests, ResponseErrorFromCodeAndMessage) {
     ASSERT_TRUE(std::holds_alternative<ErrorResponseBody>(response.body));
     const auto& body = std::get<ErrorResponseBody>(response.body);
     EXPECT_EQ(body.code, static_cast<u32>(ErrorCode::badInput));
-    EXPECT_EQ(body.message, Bytes({'b', 'a', 'd', ' ', 'i', 'n', 'p', 'u', 't'}));
+    EXPECT_EQ(
+        body.message, Bytes({'b', 'a', 'd', ' ', 'i', 'n', 'p', 'u', 't'})
+    );
 }
 
 TEST(MessageTests, ResponseErrorFromCodeCanCarryEmptyMessage) {

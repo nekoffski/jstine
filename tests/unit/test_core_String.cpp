@@ -42,10 +42,7 @@ TEST(StringTests, ExtractsNamesAndExtensions) {
 TEST(StringTests, FormatsBytesAsBinaryHexAndHexDump) {
     const Bytes bytes{0x00, 0x41, 0xff};
 
-    EXPECT_EQ(
-        toBinaryString(bytes),
-        "000000000100000111111111"
-    );
+    EXPECT_EQ(toBinaryString(bytes), "000000000100000111111111");
     EXPECT_EQ(toHexString(bytes), "0041ff");
     EXPECT_EQ(hexDump(bytes), "00 41 ff | .A.");
 }

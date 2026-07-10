@@ -15,7 +15,7 @@ build-debug:
 	cmake --build --preset conan-debug
 
 fmt:
-	find src -name '*.cpp' -o -name '*.hh' -o -name '*.h' | xargs clang-format -i
+	find src tests -name '*.cpp' -o -name '*.hh' -o -name '*.h' | xargs clang-format -i
 
 test: build-debug
 	ctest --preset conan-debug --output-on-failure

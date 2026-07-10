@@ -12,7 +12,8 @@ TEST(ErrorTests, StoresCodeAndMessage) {
 }
 
 TEST(ErrorTests, UnexpectedWrapsError) {
-    const auto unexpected = Error::unexpected(ErrorCode::notFound, "missing {}", 3);
+    const auto unexpected =
+        Error::unexpected(ErrorCode::notFound, "missing {}", 3);
 
     EXPECT_EQ(unexpected.error().code(), ErrorCode::notFound);
     EXPECT_EQ(unexpected.error().message(), "missing 3");

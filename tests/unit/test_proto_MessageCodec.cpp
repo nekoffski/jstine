@@ -2,8 +2,8 @@
 
 #include <array>
 #include <cstring>
-#include <variant>
 #include <span>
+#include <variant>
 
 #include "proto/MessageCodec.hh"
 #include "proto/impl/JFP.hh"
@@ -20,7 +20,8 @@ TEST(MessageCodecTests, ConstructsJfpCodecWithMatchingProtocol) {
 TEST(MessageCodecTests, JfpCodecProvidesConcreteDecoderAndEncoder) {
     MessageCodec codec{Protocol::jfp};
 
-    JFPRequestDecoder& decoder = dynamic_cast<JFPRequestDecoder&>(codec.decoder());
+    JFPRequestDecoder& decoder =
+        dynamic_cast<JFPRequestDecoder&>(codec.decoder());
     JFPResponseEncoder& encoder =
         dynamic_cast<JFPResponseEncoder&>(codec.encoder());
 
@@ -31,7 +32,8 @@ TEST(MessageCodecTests, JfpCodecProvidesConcreteDecoderAndEncoder) {
 TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
     MessageCodec codec{Protocol::jfp};
 
-    JFPRequestDecoder& decoder = dynamic_cast<JFPRequestDecoder&>(codec.decoder());
+    JFPRequestDecoder& decoder =
+        dynamic_cast<JFPRequestDecoder&>(codec.decoder());
     JFPResponseEncoder& encoder =
         dynamic_cast<JFPResponseEncoder&>(codec.encoder());
 
@@ -40,7 +42,8 @@ TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
 
     Bytes requestFrame;
     requestFrame.resize(8);
-    const u32 payloadSize = 4 + 5 + static_cast<u32>(key.size()) + 5 + static_cast<u32>(value.size());
+    const u32 payloadSize = 4 + 5 + static_cast<u32>(key.size()) + 5 +
+                            static_cast<u32>(value.size());
     std::memcpy(requestFrame.data(), &payloadSize, sizeof(payloadSize));
     const u32 kind = static_cast<u32>(RequestKind::set);
     std::memcpy(requestFrame.data() + 4, &kind, sizeof(kind));
@@ -49,7 +52,9 @@ TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
         requestFrame.push_back(static_cast<u8>(type));
         const u32 size = static_cast<u32>(data.size());
         const auto* sizeBytes = reinterpret_cast<const Byte*>(&size);
-        requestFrame.insert(requestFrame.end(), sizeBytes, sizeBytes + sizeof(size));
+        requestFrame.insert(
+            requestFrame.end(), sizeBytes, sizeBytes + sizeof(size)
+        );
         requestFrame.insert(requestFrame.end(), data.begin(), data.end());
     };
     appendField(JFPFieldType::key, key);

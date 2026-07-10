@@ -20,7 +20,8 @@ void appendField(Bytes& frame, JFPFieldType type, std::span<const Byte> data) {
 }
 
 Bytes makeRequestFrame(
-    RequestKind kind, std::initializer_list<std::pair<JFPFieldType, Bytes>> fields
+    RequestKind kind,
+    std::initializer_list<std::pair<JFPFieldType, Bytes>> fields
 ) {
     Bytes frame(8);
     const auto fieldBytes = [&]() {
@@ -75,10 +76,9 @@ TEST(JFPTests, DecoderParsesPingWithoutPayload) {
 TEST(JFPTests, DecoderParsesPingWithPayload) {
     JFPRequestDecoder decoder;
     const Bytes payload{'h', 'e', 'l', 'l', 'o'};
-    decoder.feed(makeRequestFrame(
-        RequestKind::ping,
-        {{JFPFieldType::payload, payload}}
-    ));
+    decoder.feed(
+        makeRequestFrame(RequestKind::ping, {{JFPFieldType::payload, payload}})
+    );
 
     const auto decoded = decoder.decode();
 
@@ -134,10 +134,9 @@ TEST(JFPTests, DecoderParsesGetDeleteAndExistsRequests) {
 
     {
         JFPRequestDecoder decoder;
-        decoder.feed(makeRequestFrame(
-            RequestKind::get,
-            {{JFPFieldType::key, key}}
-        ));
+        decoder.feed(
+            makeRequestFrame(RequestKind::get, {{JFPFieldType::key, key}})
+        );
 
         const auto decoded = decoder.decode();
         ASSERT_TRUE(decoded);
@@ -148,10 +147,9 @@ TEST(JFPTests, DecoderParsesGetDeleteAndExistsRequests) {
 
     {
         JFPRequestDecoder decoder;
-        decoder.feed(makeRequestFrame(
-            RequestKind::del,
-            {{JFPFieldType::key, key}}
-        ));
+        decoder.feed(
+            makeRequestFrame(RequestKind::del, {{JFPFieldType::key, key}})
+        );
 
         const auto decoded = decoder.decode();
         ASSERT_TRUE(decoded);
@@ -162,10 +160,9 @@ TEST(JFPTests, DecoderParsesGetDeleteAndExistsRequests) {
 
     {
         JFPRequestDecoder decoder;
-        decoder.feed(makeRequestFrame(
-            RequestKind::exists,
-            {{JFPFieldType::key, key}}
-        ));
+        decoder.feed(
+            makeRequestFrame(RequestKind::exists, {{JFPFieldType::key, key}})
+        );
 
         const auto decoded = decoder.decode();
         ASSERT_TRUE(decoded);
@@ -189,8 +186,7 @@ TEST(JFPTests, DecoderReportsMissingFieldsForRequests) {
     {
         JFPRequestDecoder decoder;
         decoder.feed(makeRequestFrame(
-            RequestKind::set,
-            {{JFPFieldType::key, Bytes{'k'}}}
+            RequestKind::set, {{JFPFieldType::key, Bytes{'k'}}}
         ));
 
         const auto decoded = decoder.decode();
@@ -222,10 +218,7 @@ TEST(JFPTests, DecoderReportsMissingFieldsForRequests) {
 
 TEST(JFPTests, DecoderReportsUnknownRequestKind) {
     JFPRequestDecoder decoder;
-    decoder.feed(makeRequestFrame(
-        static_cast<RequestKind>(999),
-        {}
-    ));
+    decoder.feed(makeRequestFrame(static_cast<RequestKind>(999), {}));
 
     const auto decoded = decoder.decode();
 
@@ -284,10 +277,8 @@ TEST(JFPTests, DecoderConsumesOneFrameAndKeepsTrailingBytes) {
             {JFPFieldType::value, Bytes{'1'}},
         }
     );
-    const auto second = makeRequestFrame(
-        RequestKind::get,
-        {{JFPFieldType::key, Bytes{'a'}}}
-    );
+    const auto second =
+        makeRequestFrame(RequestKind::get, {{JFPFieldType::key, Bytes{'a'}}});
 
     Bytes combined = first;
     combined.insert(combined.end(), second.begin(), second.end());
@@ -364,9 +355,7 @@ TEST(JFPTests, EncoderSerializesErrorResponseWithCodeOnly) {
     EXPECT_EQ(*encoded, 17u);
     EXPECT_EQ(
         Bytes(out.begin(), out.begin() + static_cast<ptrdiff_t>(*encoded)),
-        (Bytes{
-            13, 0, 0, 0, 1, 0, 0, 0, 4, 4, 0, 0, 0, 11, 0, 0, 0
-        })
+        (Bytes{13, 0, 0, 0, 1, 0, 0, 0, 4, 4, 0, 0, 0, 11, 0, 0, 0})
     );
 }
 
@@ -381,10 +370,8 @@ TEST(JFPTests, EncoderSerializesErrorResponseWithCodeAndMessage) {
     EXPECT_EQ(*encoded, 29u);
     EXPECT_EQ(
         Bytes(out.begin(), out.begin() + static_cast<ptrdiff_t>(*encoded)),
-        (Bytes{
-            25, 0, 0, 0, 1, 0, 0, 0, 4, 4, 0, 0, 0, 11, 0, 0, 0, 5, 7, 0, 0, 0,
-            'm', 'i', 's', 's', 'i', 'n', 'g'
-        })
+        (Bytes{25, 0, 0, 0, 1, 0, 0, 0,   4,   4,   0,   0,   0,   11, 0,
+               0,  0, 5, 7, 0, 0, 0, 'm', 'i', 's', 's', 'i', 'n', 'g'})
     );
 }
 
@@ -397,5 +384,7 @@ TEST(JFPTests, EncoderRejectsTooSmallBuffer) {
 
     ASSERT_FALSE(encoded);
     EXPECT_EQ(encoded.error().code(), ErrorCode::badInput);
-    EXPECT_EQ(encoded.error().message(), "Output buffer too small: need 15, have 4");
+    EXPECT_EQ(
+        encoded.error().message(), "Output buffer too small: need 15, have 4"
+    );
 }
