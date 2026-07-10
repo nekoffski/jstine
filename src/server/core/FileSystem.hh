@@ -16,7 +16,8 @@ class Path {
 
     template <typename... Args>
     static Path fmt(const Str& fmt, Args&&... args) {
-        return Path(fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...)
+        return Path(
+            fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...)
         );
     }
 

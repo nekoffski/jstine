@@ -19,7 +19,8 @@ class Error {
     template <typename... Args>
     explicit Error(ErrorCode code, const std::string& fmt, Args&&... args)
         : m_code(code),
-          m_message(fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...)
+          m_message(
+              fmt::format(fmt::runtime(fmt), std::forward<Args>(args)...)
           ) {}
 
     ErrorCode code() const;

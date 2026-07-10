@@ -86,7 +86,7 @@ struct _ScopeGuardOnExitCondition {
 
 template <typename Callback>
 ScopeGuard<Callback, decltype(_ScopeGuardOnExitCondition{})> operator+(
-    _ScopeGuardOnExit, Callback&& callback
+    _ScopeGuardOnExit, Callback && callback
 ) {
     return ScopeGuard<Callback, decltype(_ScopeGuardOnExitCondition{})>(
         std::forward<Callback>(callback), _ScopeGuardOnExitCondition{}
@@ -105,7 +105,7 @@ struct _ScopeGuardOnFailureCondition {
 
 template <typename Callback>
 ScopeGuard<Callback, decltype(_ScopeGuardOnFailureCondition{})> operator+(
-    _ScopeGuardOnFailure, Callback&& callback
+    _ScopeGuardOnFailure, Callback && callback
 ) {
     return ScopeGuard<Callback, decltype(_ScopeGuardOnFailureCondition{})>(
         std::forward<Callback>(callback), _ScopeGuardOnFailureCondition{}
@@ -124,7 +124,7 @@ struct _ScopeGuardOnSuccessCondition {
 
 template <typename Callback>
 ScopeGuard<Callback, decltype(_ScopeGuardOnSuccessCondition{})> operator+(
-    _ScopeGuardOnSuccess, Callback&& callback
+    _ScopeGuardOnSuccess, Callback && callback
 ) {
     return ScopeGuard<Callback, decltype(_ScopeGuardOnSuccessCondition{})>(
         std::forward<Callback>(callback), _ScopeGuardOnSuccessCondition{}

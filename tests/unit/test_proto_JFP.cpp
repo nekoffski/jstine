@@ -112,11 +112,10 @@ TEST(JFPTests, DecoderParsesSetRequest) {
     const Bytes key{'k', 'e', 'y'};
     const Bytes value{'v', 'a', 'l'};
     decoder.feed(makeRequestFrame(
-        RequestKind::set,
-        {
-            {JFPFieldType::key, key},
-            {JFPFieldType::value, value},
-        }
+        RequestKind::set, {
+                              {JFPFieldType::key, key},
+                              {JFPFieldType::value, value},
+                          }
     ));
 
     const auto decoded = decoder.decode();
@@ -271,11 +270,10 @@ TEST(JFPTests, DecoderReportsFieldDataOutOfBounds) {
 TEST(JFPTests, DecoderConsumesOneFrameAndKeepsTrailingBytes) {
     JFPRequestDecoder decoder;
     const auto first = makeRequestFrame(
-        RequestKind::set,
-        {
-            {JFPFieldType::key, Bytes{'a'}},
-            {JFPFieldType::value, Bytes{'1'}},
-        }
+        RequestKind::set, {
+                              {JFPFieldType::key, Bytes{'a'}},
+                              {JFPFieldType::value, Bytes{'1'}},
+                          }
     );
     const auto second =
         makeRequestFrame(RequestKind::get, {{JFPFieldType::key, Bytes{'a'}}});
@@ -296,11 +294,10 @@ TEST(JFPTests, DecoderConsumesOneFrameAndKeepsTrailingBytes) {
 TEST(JFPTests, DecoderSupportsIncrementalFeedAcrossCalls) {
     JFPRequestDecoder decoder;
     const auto frame = makeRequestFrame(
-        RequestKind::set,
-        {
-            {JFPFieldType::key, Bytes{'k', 'e', 'y'}},
-            {JFPFieldType::value, Bytes{'v', 'a', 'l'}},
-        }
+        RequestKind::set, {
+                              {JFPFieldType::key, Bytes{'k', 'e', 'y'}},
+                              {JFPFieldType::value, Bytes{'v', 'a', 'l'}},
+                          }
     );
 
     decoder.feed({frame.data(), 3});
