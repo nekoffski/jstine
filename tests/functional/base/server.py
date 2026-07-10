@@ -5,6 +5,7 @@ import signal
 import socket
 import subprocess
 import threading
+import contextlib
 import time
 from pathlib import Path
 
@@ -53,6 +54,9 @@ class Server:
         return stdout, stderr
 
     def start(self, timeout: float = 10.0) -> None:
+        with contextlib.suppress(subprocess.CalledProcessError):
+            subprocess.run('pkill jstined', shell=True, check=True)
+
         if self.process is not None and self.process.poll() is None:
             return
 
