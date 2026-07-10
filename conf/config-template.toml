@@ -1,5 +1,6 @@
 [api]
 port = 9991
+concurrency = 4
 
 [log]
 level = "info"

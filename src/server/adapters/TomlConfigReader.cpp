@@ -93,6 +93,7 @@ class Reader : public NonCopyable, public NonMovable {
 
 Opt<Error> readFields(Config& c, const Reader& reader) {
     READ_FIELD(c.api().port, "api", "port", u16);
+    READ_FIELD(c.api().concurrency, "api", "concurrency", u16);
     READ_FIELD_T(c.log().level, "log", "level", Str, log::levelFromString);
 
     return Error::empty();

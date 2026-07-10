@@ -57,7 +57,7 @@ template <typename... Args>
 
 struct LoggerOptions {
     bool enableColors{false};
-    std::string formatPattern{"%^[%d-%m-%Y %T] [Th: %t] %-7l [hyp]: %v %$"};
+    std::string formatPattern{"%^[%d-%m-%Y %T] [Th: %t] %-7l [jstined]: %v %$"};
 };
 
 void init(const LoggerOptions& options = LoggerOptions{});
@@ -140,35 +140,35 @@ namespace internal {
 
 template <typename... Args>
 void debug(details::FormatWithLocation fmt, Args&&... args) {
-#ifdef hyp_ENABLE_INTERNAL_LOGGING
+#ifdef JSTINE_ENABLE_INTERNAL_LOGGING
     log::debug(std::move(fmt), std::forward<Args>(args)...);
 #endif
 }
 
 template <typename... Args>
 void error(details::FormatWithLocation fmt, Args&&... args) {
-#ifdef hyp_ENABLE_INTERNAL_LOGGING
+#ifdef JSTINE_ENABLE_INTERNAL_LOGGING
     log::error(std::move(fmt), std::forward<Args>(args)...);
 #endif
 }
 
 template <typename... Args>
 void info(details::FormatWithLocation fmt, Args&&... args) {
-#ifdef hyp_ENABLE_INTERNAL_LOGGING
+#ifdef JSTINE_ENABLE_INTERNAL_LOGGING
     log::info(std::move(fmt), std::forward<Args>(args)...);
 #endif
 }
 
 template <typename... Args>
 void trace(details::FormatWithLocation fmt, Args&&... args) {
-#ifdef hyp_ENABLE_INTERNAL_LOGGING
+#ifdef JSTINE_ENABLE_INTERNAL_LOGGING
     log::trace(std::move(fmt), std::forward<Args>(args)...);
 #endif
 }
 
 template <typename... Args>
 void warn(details::FormatWithLocation fmt, Args&&... args) {
-#ifdef hyp_ENABLE_INTERNAL_LOGGING
+#ifdef JSTINE_ENABLE_INTERNAL_LOGGING
     log::warn(std::move(fmt), std::forward<Args>(args)...);
 #endif
 }

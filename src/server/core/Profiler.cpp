@@ -9,21 +9,32 @@
 
 namespace jstine {
 
+thread_local ProfilerEvents* Profiler::s_threadEvents = nullptr;
+
 static constexpr f64 toMS(f64 nanoseconds) {
     return static_cast<f64>(nanoseconds) / 1'000'000.0;
 }
 
 RegionTimer Profiler::profileRegion(const std::string& name) {
-    return RegionTimer{name, m_threads[std::this_thread::get_id()]};
+    return RegionTimer{name, threadEvents()};
 }
 
 void Profiler::registerThread() {
     const auto id = std::this_thread::get_id();
     std::lock_guard lock{m_mutex};
-    m_threads.try_emplace(id);
+    auto [it, _] = m_threads.try_emplace(id);
+    s_threadEvents = &it->second;
+}
+
+ProfilerEvents& Profiler::threadEvents() {
+    if (s_threadEvents == nullptr) {
+        registerThread();
+    }
+    return *s_threadEvents;
 }
 
 ProfilerSummary Profiler::generateSummary() {
+    std::lock_guard lock{m_mutex};
     ON_SCOPE_EXIT { clear(); };
     return ProfilerSummary{m_threads};
 }
@@ -56,12 +67,12 @@ ProfilerSummary::ProfilerSummary(const ProfilerEventsPerThread& events) {
 }
 
 void ProfilerSummary::print() const {
-    log::debug("──── Profiler ────────────────────────────────────");
+    log::info("──── Profiler ────────────────────────────────────");
     for (const auto& [threadId, graph] : m_summaryGraphs) {
-        log::debug("  Thread {}", threadId);
+        log::info("  Thread {}", threadId);
         printGraph(graph, "  ");
     }
-    log::debug("──────────────────────────────────────────────────");
+    log::info("──────────────────────────────────────────────────");
 }
 
 void ProfilerSummary::generateSummary(const ProfilerEventsPerThread& events) {
@@ -88,6 +99,9 @@ void ProfilerSummary::processThread(
             child.times.push_back(timestamp.time_since_epoch().count());
             current = &child;
         } else {
+            if (current == &root or current->times.empty()) {
+                continue;
+            }
             auto& times = current->times;
             const auto beginTime = times.back();
             times.back() = timestamp.time_since_epoch().count() - beginTime;
@@ -119,13 +133,13 @@ void ProfilerSummary::printGraph(
         const auto* stem = isLast ? "   " : "│  ";
 
         if (stats.count > 1) {
-            log::debug(
+            log::info(
                 "{}{}{}  x{}  {:.3f}ms  (avg {:.3f}ms)", prefix, branch,
                 child.name, stats.count, toMS(stats.totalTime),
                 toMS(stats.averageTime)
             );
         } else {
-            log::debug(
+            log::info(
                 "{}{}{}  {:.3f}ms", prefix, branch, child.name,
                 toMS(stats.totalTime)
             );

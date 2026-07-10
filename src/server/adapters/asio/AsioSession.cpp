@@ -20,7 +20,6 @@ Error convertError(const std::error_code& ec) {
     if (ec == asio::error::eof) {
         return Error{ErrorCode::eof, "Socket closed by peer"};
     }
-
     return Error{ErrorCode::connectionFailure, ec.message()};
 }
 
@@ -47,11 +46,8 @@ asio::awaitable<void> AsioSession::start() {
 
     MessageCodec codec{protocol.value()};
 
-    auto& encoder = codec.encoder();
-    auto& decoder = codec.decoder();
-
     for (;;) {
-        auto request = co_await readRequest(decoder);
+        auto request = co_await readRequest(codec);
 
         if (not request) {
             logError("recv", request.error());
@@ -60,23 +56,21 @@ asio::awaitable<void> AsioSession::start() {
 
         auto response = m_messageHandler.onRequest(*request);
 
-        if (auto err = co_await writeResponse(response, encoder); err) {
+        if (auto err = co_await writeResponse(response, codec); err) {
             logError("send", *err);
             co_return;
         }
     }
 }
-asio::awaitable<Result<Request>> AsioSession::readRequest(
-    RequestDecoder& decoder
-) {
+asio::awaitable<Result<Request>> AsioSession::readRequest(MessageCodec& codec) {
     for (;;) {
         if (auto bytes = co_await read(); bytes) {
-            decoder.feed({m_buffer.data(), *bytes});
+            codec.feed({m_buffer.data(), *bytes});
         } else {
             co_return Error::unexpected(bytes.error());
         }
 
-        auto request = decoder.decode();
+        auto request = codec.decode();
 
         if (not request) {
             log::debug(
@@ -98,9 +92,9 @@ asio::awaitable<Result<Request>> AsioSession::readRequest(
 }
 
 asio::awaitable<Opt<Error>> AsioSession::writeResponse(
-    const Response& response, ResponseEncoder& encoder
+    const Response& response, MessageCodec& codec
 ) {
-    auto encodedBytes = encoder.encode(response, m_buffer);
+    auto encodedBytes = codec.encode(response, m_buffer);
 
     if (not encodedBytes) {
         co_return encodedBytes.error();

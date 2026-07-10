@@ -71,6 +71,7 @@ void Config::overrideFields(int argc, char** argv) {
     app.allow_extras();
 
     app.add_option("--api-port", m_api.port, "API listen port");
+    app.add_option("--api-concurrency", m_api.concurrency, "API concurrency");
 
     app.add_option("--log-level", m_log.level, "Logging level")
         ->transform(CLI::CheckedTransformer(log::levelMap(), CLI::ignore_case));
@@ -81,6 +82,7 @@ void Config::overrideFields(int argc, char** argv) {
 void logFields(const Config& cfg) {
     log::info("loaded config:");
     log::info("\tapi.port = {}", cfg.api().port);
+    log::info("\tapi.concurrency = {}", cfg.api().concurrency);
     log::info("\tlog.level = {}", log::levelToString(cfg.log().level));
 }
 

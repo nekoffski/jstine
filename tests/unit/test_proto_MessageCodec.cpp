@@ -17,25 +17,8 @@ TEST(MessageCodecTests, ConstructsJfpCodecWithMatchingProtocol) {
     EXPECT_EQ(protocolToStr(codec.protocol()), "jfp");
 }
 
-TEST(MessageCodecTests, JfpCodecProvidesConcreteDecoderAndEncoder) {
-    MessageCodec codec{Protocol::jfp};
-
-    JFPRequestDecoder& decoder =
-        dynamic_cast<JFPRequestDecoder&>(codec.decoder());
-    JFPResponseEncoder& encoder =
-        dynamic_cast<JFPResponseEncoder&>(codec.encoder());
-
-    EXPECT_EQ(&decoder, &codec.decoder());
-    EXPECT_EQ(&encoder, &codec.encoder());
-}
-
 TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
     MessageCodec codec{Protocol::jfp};
-
-    JFPRequestDecoder& decoder =
-        dynamic_cast<JFPRequestDecoder&>(codec.decoder());
-    JFPResponseEncoder& encoder =
-        dynamic_cast<JFPResponseEncoder&>(codec.encoder());
 
     const Bytes key{'k', 'e', 'y'};
     const Bytes value{'v', 'a', 'l'};
@@ -60,8 +43,8 @@ TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
     appendField(JFPFieldType::key, key);
     appendField(JFPFieldType::value, value);
 
-    decoder.feed(requestFrame);
-    const auto decoded = decoder.decode();
+    codec.feed(requestFrame);
+    const auto decoded = codec.decode();
     ASSERT_TRUE(decoded);
     EXPECT_EQ(decoded->kind, RequestKind::set);
     ASSERT_TRUE(std::holds_alternative<SetRequestBody>(decoded->body));
@@ -71,7 +54,7 @@ TEST(MessageCodecTests, JfpCodecCanDecodeAndEncode) {
 
     const Response response = Response::ok(Bytes{'o', 'k'});
     std::array<Byte, 64> out{};
-    const auto encoded = encoder.encode(response, out);
+    const auto encoded = codec.encode(response, out);
     ASSERT_TRUE(encoded);
     EXPECT_EQ(*encoded, 15u);
     EXPECT_EQ(

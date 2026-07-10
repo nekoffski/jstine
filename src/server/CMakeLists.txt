@@ -49,3 +49,8 @@ target_link_libraries(jstined_lib
 
 add_executable(jstined "main.cpp")
 target_link_libraries(jstined PRIVATE jstined_lib)
+
+if (JSTINE_ENABLE_PROFILING)
+    target_compile_definitions(jstined_lib PRIVATE JSTINE_ENABLE_PROFILING=1)
+    target_compile_definitions(jstined PRIVATE JSTINE_ENABLE_PROFILING=1)
+endif()

@@ -21,6 +21,7 @@ class Config {
    public:
     struct Api {
         u16 port;
+        u16 concurrency;
     };
 
     struct Log {

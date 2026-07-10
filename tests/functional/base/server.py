@@ -119,7 +119,7 @@ class Server:
 
         if self.process.poll() is None:
             try:
-                os.killpg(self.process.pid, signal.SIGTERM)
+                os.killpg(self.process.pid, signal.SIGINT)
             except ProcessLookupError:
                 pass
             except PermissionError:

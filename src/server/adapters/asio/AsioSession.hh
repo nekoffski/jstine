@@ -7,9 +7,8 @@
 #include "api/MessageHandler.hh"
 #include "core/Concepts.hh"
 #include "core/Core.hh"
+#include "proto/MessageCodec.hh"
 #include "proto/Protocol.hh"
-#include "proto/RequestDecoder.hh"
-#include "proto/ResponseEncoder.hh"
 
 namespace jstine {
 
@@ -28,9 +27,9 @@ class AsioSession : public NonCopyable, public NonMovable {
     asio::awaitable<Result<u64>> read();
     asio::awaitable<Result<u64>> write(u64 bytesToWrite);
 
-    asio::awaitable<Result<Request>> readRequest(RequestDecoder& decoder);
+    asio::awaitable<Result<Request>> readRequest(MessageCodec& codec);
     asio::awaitable<Opt<Error>> writeResponse(
-        const Response& response, ResponseEncoder& encoder
+        const Response& response, MessageCodec& codec
     );
 
     asio::awaitable<Result<Protocol>> establishProtocol();

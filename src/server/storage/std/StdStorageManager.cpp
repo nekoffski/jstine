@@ -3,18 +3,24 @@
 namespace jstine {
 
 bool StdStorageManager::exists(const Key& key) const {
+    std::shared_lock lk{m_storageMutex};
     return m_storage.contains(key);
 }
 
-void StdStorageManager::remove(const Key& key) { m_storage.erase(key); }
+void StdStorageManager::remove(const Key& key) {
+    std::unique_lock lk{m_storageMutex};
+    m_storage.erase(key);
+}
 
 Opt<Error> StdStorageManager::set(const Key& key, const Value& value) {
+    std::unique_lock lk{m_storageMutex};
     m_storage[key] = value;
     return {};
 }
 
 Result<Value> StdStorageManager::get(const Key& key) const {
-    if (not exists(key)) {
+    std::shared_lock lk{m_storageMutex};
+    if (not m_storage.contains(key)) {
         return Error::unexpected(ErrorCode::notFound, "Key does not exist");
     }
     return m_storage.at(key);

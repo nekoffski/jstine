@@ -4,17 +4,25 @@
 #include "core/Config.hh"
 #include "core/Log.hh"
 #include "core/OS.hh"
+#include "core/Profiler.hh"
 #include "core/Scope.hh"
 
 using namespace jstine;
 
 int main(int argc, char** argv) {
-    log::init(log::LoggerOptions{
-        .enableColors = true,
-        .formatPattern = "[%Y-%m-%d %T] [Th: %t] %-5l [jstined]: %v",
-    });
+    log::init(
+        log::LoggerOptions{
+            .enableColors = false,
+            .formatPattern = "[%Y-%m-%d %T] [Th: %t] %-7l [jstined]: %v",
+        }
+    );
 
     log::info("jstine server ({}) starting..", toString(detectOs()));
+
+    if constexpr (profilerEnabled()) {
+        Profiler::get().noop();
+        log::warn("Profiler is enabled");
+    }
 
     {
         TomlConfigReader reader;
@@ -38,6 +46,7 @@ int main(int argc, char** argv) {
         }
     }
 
+    JSTINE_PROFILE_DUMP_SUMMARY();
     log::info("jstine server finished gracefully, cya!");
     return 0;
 }

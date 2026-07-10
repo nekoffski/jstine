@@ -90,33 +90,44 @@ class Profiler : public Singleton<Profiler> {
     [[nodiscard]] ProfilerSummary generateSummary();
 
    private:
+    ProfilerEvents& threadEvents();
     void clear();
 
     std::mutex m_mutex;
     ProfilerEventsPerThread m_threads;
+    thread_local static ProfilerEvents* s_threadEvents;
 };
 
 }  // namespace jstine
 
-#ifdef hyp_ENABLE_PROFILING
+constexpr bool profilerEnabled() {
+#ifdef JSTINE_ENABLE_PROFILING
+    return true;
+#else
+    return false;
+#endif
+}
 
-#define hyp_PROFILE_REGION(name)       \
+#ifdef JSTINE_ENABLE_PROFILING
+
+#define JSTINE_PROFILE_REGION(name)    \
     auto ANONYMOUS_VAR(REGION_TIMER) = \
         jstine::Profiler::get().profileRegion(name)
 
-#define hyp_PROFILE_FUNCTION()           \
+#define JSTINE_PROFILE_FUNCTION()        \
     auto ANONYMOUS_VAR(FUNCTION_TIMER) = \
         jstine::Profiler::get().profileRegion(__func__)
 
-#define hyp_PROFILE_REGISTER_THREAD() jstine::Profiler::get().registerThread()
-#define hyp_PROFILE_DUMP_SUMMARY() \
+#define JSTINE_PROFILE_REGISTER_THREAD() \
+    jstine::Profiler::get().registerThread()
+#define JSTINE_PROFILE_DUMP_SUMMARY() \
     jstine::Profiler::get().generateSummary().print()
 
 #else
 
-#define hyp_PROFILE_REGION(name)
-#define hyp_PROFILE_FUNCTION()
-#define hyp_PROFILE_REGISTER_THREAD()
-#define hyp_PROFILE_DUMP_SUMMARY()
+#define JSTINE_PROFILE_REGION(name)
+#define JSTINE_PROFILE_FUNCTION()
+#define JSTINE_PROFILE_REGISTER_THREAD()
+#define JSTINE_PROFILE_DUMP_SUMMARY()
 
 #endif

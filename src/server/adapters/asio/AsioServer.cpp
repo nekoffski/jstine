@@ -1,6 +1,7 @@
 #include "AsioServer.hh"
 
 #include "AsioSession.hh"
+#include "runtime/Thread.hh"
 
 namespace jstine {
 
@@ -19,7 +20,25 @@ void AsioServer::run() {
         },
         asio::detached
     );
-    m_io.run();
+
+    if (const auto threads = m_cfg.api().concurrency; threads > 1) {
+        log::info("ASIO server starting with {} threads", threads);
+
+        ThreadGroup tg;
+        for (int i = 0; i < threads; ++i) {
+            tg.add([&] { m_io.run(); });
+        }
+
+        if (const auto err = tg.start(); err) {
+            log::panic("failed to start thread group: {}", err->message());
+            return;
+        }
+
+        tg.join();
+    } else {
+        log::info("ASIO server starting single-threaded");
+        m_io.run();
+    }
 }
 
 void AsioServer::cancel() { m_io.stop(); }

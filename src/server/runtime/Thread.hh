@@ -28,6 +28,23 @@ class Thread : public NonCopyable, public NonMovable {
     std::thread m_thread;
 };
 
+namespace {
+
+template <typename Callback>
+    requires Callable<Callback, void()>
+class ThreadWrapper : public Thread {
+   public:
+    explicit ThreadWrapper(Callback&& callback)
+        : m_callback(std::forward<Callback>(callback)) {}
+
+   private:
+    void run() override { m_callback(); }
+
+    Callback m_callback;
+};
+
+}  // namespace
+
 class ThreadGroup : public NonCopyable, public NonMovable {
    public:
     [[nodiscard]] Opt<Error> start();
@@ -39,6 +56,16 @@ class ThreadGroup : public NonCopyable, public NonMovable {
                  std::constructible_from<T, Args...>
     void add(Args&&... args) {
         m_threads.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+    }
+
+    template <typename Callback>
+        requires Callable<Callback, void()>
+    void add(Callback&& callback) {
+        m_threads.push_back(
+            std::make_unique<ThreadWrapper<Callback>>(
+                std::forward<Callback>(callback)
+            )
+        );
     }
 
    private:

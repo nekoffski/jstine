@@ -1,12 +1,17 @@
 #include "Thread.hh"
 
+#include <functional>
+
 #include "core/Error.hh"
 #include "core/Log.hh"
+#include "core/Profiler.hh"
 
 namespace jstine {
 
 void Thread::start() {
     m_thread = std::thread([this] {
+        JSTINE_PROFILE_REGISTER_THREAD();
+
         try {
             run();
         } catch (const std::exception& e) {

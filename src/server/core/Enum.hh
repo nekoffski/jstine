@@ -49,6 +49,6 @@ bool checkFlag(auto value, auto flag) {
            0;
 }
 
-#define hyp_BIT_ENUM(name) constexpr void enableBitOperations(name);
+#define JSTINE_BIT_ENUM(name) constexpr void enableBitOperations(name);
 
 }  // namespace jstine

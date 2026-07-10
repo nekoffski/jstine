@@ -19,8 +19,9 @@ class MessageCodec : public NonCopyable {
 
     Protocol protocol() const;
 
-    RequestDecoder& decoder();
-    ResponseEncoder& encoder();
+    void feed(std::span<const Byte> bytes);
+    Result<Request> decode();
+    Result<u64> encode(const Response& response, std::span<Byte> bytes);
 
    private:
     std::unique_ptr<RequestDecoder> m_decoder;

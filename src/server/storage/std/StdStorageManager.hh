@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 
 #include "core/Concepts.hh"
@@ -32,6 +34,7 @@ class StdStorageManager : public StorageManager {
 
    private:
     std::unordered_map<Key, Value, VecU8Hash> m_storage;
+    mutable std::shared_mutex m_storageMutex;
 };
 
 }  // namespace jstine
