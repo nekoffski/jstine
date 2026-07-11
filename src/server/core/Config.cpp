@@ -39,9 +39,11 @@ Result<Path> readConfigPath(int argc, char** argv) {
 
 const Config::Api& Config::api() const { return m_api; }
 const Config::Log& Config::log() const { return m_log; }
+const Config::Storage& Config::storage() const { return m_storage; }
 
 Config::Api& Config::api() { return m_api; }
 Config::Log& Config::log() { return m_log; }
+Config::Storage& Config::storage() { return m_storage; }
 
 void logFields(const Config& cfg);
 
@@ -76,6 +78,29 @@ void Config::overrideFields(int argc, char** argv) {
     app.add_option("--log-level", m_log.level, "Logging level")
         ->transform(CLI::CheckedTransformer(log::levelMap(), CLI::ignore_case));
 
+    app.add_option(
+           "--storage-keyspace-type", m_storage.keyspace, "Keyspace type"
+    )
+        ->transform(
+            CLI::CheckedTransformer(
+                std::map<std::string, KeyspaceType>{
+                    {"std", KeyspaceType::std},
+                    {"v1", KeyspaceType::v1},
+                },
+                CLI::ignore_case
+            )
+        );
+
+    app.add_option(
+        "--storage-reaper-interval", m_storage.reaperInterval,
+        "Storage reaper interval in seconds"
+    );
+
+    app.add_option(
+        "--storage-default-expiration", m_storage.defaultExpiration,
+        "Storage default expiration in seconds"
+    );
+
     app.parse(argc, argv);
 }
 
@@ -84,6 +109,38 @@ void logFields(const Config& cfg) {
     log::info("\tapi.port = {}", cfg.api().port);
     log::info("\tapi.concurrency = {}", cfg.api().concurrency);
     log::info("\tlog.level = {}", log::levelToString(cfg.log().level));
+    log::info(
+        "\tstorage.keyspace = {}", keyspaceTypeToString(cfg.storage().keyspace)
+    );
+    log::info(
+        "\tstorage.reaperInterval = {} seconds",
+        cfg.storage().reaperInterval.count()
+    );
+    log::info(
+        "\tstorage.defaultExpiration = {} seconds",
+        cfg.storage().defaultExpiration.count()
+    );
+}
+
+Str keyspaceTypeToString(KeyspaceType type) {
+    switch (type) {
+        case KeyspaceType::std:
+            return "std";
+        case KeyspaceType::v1:
+            return "v1";
+    }
+    return "";
+}
+
+KeyspaceType keyspaceTypeFromString(const Str& str) {
+    if (str == "std") {
+        return KeyspaceType::std;
+    } else if (str == "v1") {
+        return KeyspaceType::v1;
+    } else {
+        log::warn("Unknown keyspace type '{}', defaulting to 'std'", str);
+        return KeyspaceType::std;
+    }
 }
 
 }  // namespace jstine

@@ -11,14 +11,19 @@ namespace jstine {
 void Thread::start() {
     m_thread = std::thread([this] {
         JSTINE_PROFILE_REGISTER_THREAD();
+        log::info("{} - thread starting", m_ident);
 
         try {
             run();
         } catch (const std::exception& e) {
-            log::error("Standard exception in thread: {}", e.what());
+            log::error(
+                "{} - standard exception in thread: {}", m_ident, e.what()
+            );
         } catch (...) {
-            log::error("Unknown exception in thread");
+            log::error("{} - unknown exception in thread", m_ident);
         }
+
+        log::info("{} - thread exiting", m_ident);
     });
 }
 
@@ -33,6 +38,8 @@ Opt<Error> Thread::init() { return Error::empty(); }
 void Thread::sleepFor(std::chrono::milliseconds duration) {
     std::this_thread::sleep_for(duration);
 }
+
+Thread::Thread(const Str& ident) : m_ident(ident) {}
 
 Thread::~Thread() { join(); }
 

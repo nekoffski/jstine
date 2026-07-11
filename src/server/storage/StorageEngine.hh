@@ -5,6 +5,7 @@
 #include "Database.hh"
 #include "Key.hh"
 #include "Keyspace.hh"
+#include "Reaper.hh"
 #include "Value.hh"
 #include "core/Concepts.hh"
 #include "core/Config.hh"
@@ -19,10 +20,14 @@ class StorageEngine : public NonCopyable, public NonMovable {
 
     Database& database();
 
+    void start();
+    void stop();
+
    private:
     const Config& m_config;
     std::unique_ptr<Keyspace> m_keyspace;
     Database m_database;
+    Reaper m_reaper;
 };
 
 }  // namespace jstine

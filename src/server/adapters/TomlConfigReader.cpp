@@ -95,6 +95,17 @@ Opt<Error> readFields(Config& c, const Reader& reader) {
     READ_FIELD(c.api().port, "api", "port", u16);
     READ_FIELD(c.api().concurrency, "api", "concurrency", u16);
     READ_FIELD_T(c.log().level, "log", "level", Str, log::levelFromString);
+    READ_FIELD_T(
+        c.storage().keyspace, "storage", "keyspace", Str, keyspaceTypeFromString
+    );
+    READ_FIELD_T(
+        c.storage().reaperInterval, "storage", "reaperIntervalSeconds", u16,
+        std::chrono::seconds
+    );
+    READ_FIELD_T(
+        c.storage().defaultExpiration, "storage", "defaultExpirationSeconds",
+        u16, std::chrono::seconds
+    );
 
     return Error::empty();
 }

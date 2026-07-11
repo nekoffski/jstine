@@ -6,7 +6,9 @@
 namespace jstine {
 
 AsioServer::AsioServer(const Config& cfg, MessageHandler& handler)
-    : m_cfg(cfg),
+    : Thread("AsioMain"),
+      m_io(cfg.api().concurrency),
+      m_cfg(cfg),
       m_messageHandler(handler),
       m_acceptor(m_io, {asio::ip::tcp::v4(), cfg.api().port}) {}
 
@@ -26,7 +28,7 @@ void AsioServer::run() {
 
         ThreadGroup tg;
         for (int i = 0; i < threads; ++i) {
-            tg.add([&] { m_io.run(); });
+            tg.add(fmt::format("AsioWorker{}", i + 1), [&] { m_io.run(); });
         }
 
         if (const auto err = tg.start(); err) {

@@ -11,6 +11,7 @@ namespace jstine {
 
 class Thread : public NonCopyable, public NonMovable {
    public:
+    explicit Thread(const Str& ident);
     virtual ~Thread();
 
     void start();
@@ -25,6 +26,7 @@ class Thread : public NonCopyable, public NonMovable {
    private:
     virtual void run() = 0;
 
+    Str m_ident;
     std::thread m_thread;
 };
 
@@ -34,8 +36,8 @@ template <typename Callback>
     requires Callable<Callback, void()>
 class ThreadWrapper : public Thread {
    public:
-    explicit ThreadWrapper(Callback&& callback)
-        : m_callback(std::forward<Callback>(callback)) {}
+    explicit ThreadWrapper(const Str& ident, Callback&& callback)
+        : Thread(ident), m_callback(std::forward<Callback>(callback)) {}
 
    private:
     void run() override { m_callback(); }
@@ -60,10 +62,10 @@ class ThreadGroup : public NonCopyable, public NonMovable {
 
     template <typename Callback>
         requires Callable<Callback, void()>
-    void add(Callback&& callback) {
+    void add(const Str& ident, Callback&& callback) {
         m_threads.push_back(
             std::make_unique<ThreadWrapper<Callback>>(
-                std::forward<Callback>(callback)
+                ident, std::forward<Callback>(callback)
             )
         );
     }

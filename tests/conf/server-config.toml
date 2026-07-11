@@ -2,5 +2,10 @@
 port = 9991
 concurrency = 4
 
+[storage]
+keyspace = "std"
+defaultExpirationSeconds = 3600
+reaperIntervalSeconds = 120
+
 [log]
 level = "info"

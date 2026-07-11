@@ -16,6 +16,8 @@ Opt<Error> Server::run() {
     }
     ON_SCOPE_EXIT { deinitSignals(); };
 
+    m_storageEngine.start();
+
     buildServices();
 
     if (auto err = m_threadGroup.start(); err) {
@@ -43,6 +45,7 @@ void Server::deinitSignals() {
 
 void Server::stop() {
     log::info("stopping server");
+    m_storageEngine.stop();
     m_threadGroup.cancel();
 }
 
