@@ -18,6 +18,7 @@ import psutil
 Operation: TypeAlias = Literal["set", "get"]
 BenchmarkOperation: TypeAlias = Callable[[], None]
 Client = jstine.Client
+BenchmarkInitHook: TypeAlias = Callable[[Client, dict[str, int]], None]
 
 
 @dataclass(slots=True)
@@ -231,6 +232,7 @@ class Benchmark:
     def __init__(self, name: str):
         self.name = name
         self._workers: list[WorkerDefinition] = []
+        self._init: BenchmarkInitHook | None = None
 
     def worker(self, tag: str, default: int = 1) -> Callable[[WorkerFactory], WorkerFactory]:
         if default < 0:
@@ -245,12 +247,28 @@ class Benchmark:
 
         return register
 
+    def init(
+        self,
+        hook: BenchmarkInitHook | None = None,
+    ) -> BenchmarkInitHook | Callable[[BenchmarkInitHook], BenchmarkInitHook]:
+        def register(hook: BenchmarkInitHook) -> BenchmarkInitHook:
+            if self._init is not None:
+                raise ValueError("benchmark init hook already exists")
+            self._init = hook
+            return hook
+
+        if hook is None:
+            return register
+
+        return register(hook)
+
     def main(self) -> None:
         args = self._parse_args()
         worker_counts = self._worker_counts(args.workers)
         instances = self._worker_instances(worker_counts)
         if not instances:
             raise SystemExit("no workers configured")
+        active_tags = self._active_tags(worker_counts)
 
         process_count = min(args.processes, len(instances))
         _print_parameters(
@@ -262,6 +280,10 @@ class Benchmark:
             pid=args.pid,
             process_sample_interval=args.process_sample_interval,
         )
+
+        if self._init is not None:
+            with jstine.Client(host=args.host, port=args.port) as client:
+                self._init(client, active_tags)
 
         process_sampler = (
             ProcessSampler(args.pid, args.process_sample_interval)
@@ -374,6 +396,13 @@ class Benchmark:
             for index in range(counts[definition.tag]):
                 instances.append(WorkerInstance(definition, index))
         return instances
+
+    def _active_tags(self, counts: dict[str, int]) -> dict[str, int]:
+        return {
+            definition.tag: counts[definition.tag]
+            for definition in self._workers
+            if counts[definition.tag] > 0
+        }
 
 
 def _run_process(
@@ -491,7 +520,8 @@ def _print_parameters(
     pid: int | None,
     process_sample_interval: float,
 ) -> None:
-    worker_text = ", ".join(f"{tag}={count}" for tag, count in sorted(workers.items()))
+    worker_text = ", ".join(f"{tag}={count}" for tag,
+                            count in sorted(workers.items()))
     rows = [
         ("target", f"{host}:{port}"),
         ("duration", f"{duration:.2f}s"),
