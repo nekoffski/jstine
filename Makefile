@@ -1,4 +1,5 @@
-.PHONY: all build build-release build-debug test clean fmt fmt-check gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test
+.PHONY: all build build-release build-debug test clean fmt fmt-check gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test \
+	pre-commit
 
 CLANG_FORMAT ?= clang-format
 
@@ -45,3 +46,6 @@ sdk-python-install:
 
 sdk-python-test:
 	cd src/sdk/python && python3 -m unittest discover -s tests
+
+pre-commit:
+	./scripts/pre_commit.sh

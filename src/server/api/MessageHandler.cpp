@@ -5,16 +5,15 @@
 
 namespace jstine {
 
-MessageHandler::MessageHandler(StorageManager& storageManager)
-    : m_dispatcher(storageManager) {}
+MessageHandler::MessageHandler(Database& database) : m_dispatcher(database) {}
 
 Response MessageHandler::onRequest(const Request& request) {
     JSTINE_PROFILE_FUNCTION();
     return std::visit(m_dispatcher, request.body);
 }
 
-MessageHandler::Dispatcher::Dispatcher(StorageManager& storageManager)
-    : m_storageManager(storageManager) {}
+MessageHandler::Dispatcher::Dispatcher(Database& database)
+    : m_database(database) {}
 
 Response MessageHandler::Dispatcher::operator()(const PingRequestBody& body) {
     JSTINE_PROFILE_REGION("PingRequest");
@@ -23,7 +22,7 @@ Response MessageHandler::Dispatcher::operator()(const PingRequestBody& body) {
 
 Response MessageHandler::Dispatcher::operator()(const SetRequestBody& body) {
     JSTINE_PROFILE_REGION("SetRequest");
-    if (auto err = m_storageManager.set(body.key, body.value); err) {
+    if (auto err = m_database.set(body.key, body.value); err) {
         return Response::error(*err);
     }
     return Response::ok();
@@ -31,7 +30,7 @@ Response MessageHandler::Dispatcher::operator()(const SetRequestBody& body) {
 
 Response MessageHandler::Dispatcher::operator()(const GetRequestBody& body) {
     JSTINE_PROFILE_REGION("GetRequest");
-    if (auto value = m_storageManager.get(body.key); value) {
+    if (auto value = m_database.get(body.key); value) {
         return Response::ok(*value);
     } else {
         return Response::error(value.error());
@@ -40,17 +39,17 @@ Response MessageHandler::Dispatcher::operator()(const GetRequestBody& body) {
 
 Response MessageHandler::Dispatcher::operator()(const DelRequestBody& body) {
     JSTINE_PROFILE_REGION("DelRequest");
-    if (not m_storageManager.exists(body.key)) {
+    if (not m_database.exists(body.key)) {
         return Response::error(ErrorCode::notFound, "Key does not exist");
     }
 
-    m_storageManager.remove(body.key);
+    m_database.remove(body.key);
     return Response::ok();
 }
 
 Response MessageHandler::Dispatcher::operator()(const ExistsRequestBody& body) {
     JSTINE_PROFILE_REGION("ExistsRequest");
-    if (m_storageManager.exists(body.key)) {
+    if (m_database.exists(body.key)) {
         return Response::ok();
     }
     return Response::error(ErrorCode::notFound, "Key does not exist");

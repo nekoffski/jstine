@@ -27,8 +27,11 @@ add_library(jstined_lib STATIC
     "proto/impl/RESP.cpp"
     "proto/impl/JFP.cpp"
     # -- storage
-    "storage/StorageManager.cpp"
-    "storage/std/StdStorageManager.cpp"
+    "storage/StorageEngine.cpp"
+    "storage/Keyspace.cpp"
+    "storage/Database.cpp"
+    "storage/Reaper.cpp"
+    "storage/keyspace/std/StdKeyspace.cpp"
 
 )
 

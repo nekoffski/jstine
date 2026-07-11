@@ -7,8 +7,7 @@
 #include "core/Concepts.hh"
 #include "core/Core.hh"
 #include "core/Error.hh"
-#include "storage/Storage.hh"
-#include "storage/StorageManager.hh"
+#include "storage/Keyspace.hh"
 
 namespace jstine {
 
@@ -25,7 +24,7 @@ struct VecU8Hash {
     }
 };
 
-class StdStorageManager : public StorageManager {
+class StdKeyspace : public Keyspace {
    public:
     bool exists(const Key& key) const override;
     void remove(const Key& key) override;

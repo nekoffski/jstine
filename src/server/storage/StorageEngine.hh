@@ -1,0 +1,28 @@
+#pragma once
+
+#include <memory>
+
+#include "Database.hh"
+#include "Key.hh"
+#include "Keyspace.hh"
+#include "Value.hh"
+#include "core/Concepts.hh"
+#include "core/Config.hh"
+#include "core/Core.hh"
+#include "core/Error.hh"
+
+namespace jstine {
+
+class StorageEngine : public NonCopyable, public NonMovable {
+   public:
+    explicit StorageEngine(const Config& config);
+
+    Database& database();
+
+   private:
+    const Config& m_config;
+    std::unique_ptr<Keyspace> m_keyspace;
+    Database m_database;
+};
+
+}  // namespace jstine

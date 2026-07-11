@@ -7,8 +7,8 @@ namespace jstine {
 
 Server::Server(const ServerContext& context)
     : m_context(context),
-      m_messageHandler(*m_storageManager),
-      m_storageManager(StorageManager::create(context.config)) {}
+      m_storageEngine(context.config),
+      m_messageHandler(m_storageEngine.database()) {}
 
 Opt<Error> Server::run() {
     if (auto err = initSignals(); err) {
