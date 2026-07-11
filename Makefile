@@ -1,4 +1,6 @@
-.PHONY: all build build-release build-debug test clean fmt gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test
+.PHONY: all build build-release build-debug test clean fmt fmt-check gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test
+
+CLANG_FORMAT ?= clang-format
 
 all: build
 
@@ -15,7 +17,11 @@ build-debug:
 	cmake --build --preset conan-debug
 
 fmt:
-	find src tests -name '*.cpp' -o -name '*.hh' -o -name '*.h' | xargs clang-format -i
+	git ls-files '*.cpp' '*.hh' '*.h' | xargs -r $(CLANG_FORMAT) -i
+
+fmt-check:
+	$(CLANG_FORMAT) --version
+	git ls-files '*.cpp' '*.hh' '*.h' | xargs -r $(CLANG_FORMAT) --dry-run --Werror
 
 test: build-debug
 	ctest --preset conan-debug --output-on-failure

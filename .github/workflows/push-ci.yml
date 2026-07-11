@@ -17,11 +17,11 @@ jobs:
 
       - name: Install clang-format
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format
+          python3 -m pip install --user clang-format==22.1.4
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Check formatting
-        run: git ls-files '*.cpp' '*.hh' '*.h' | xargs -r clang-format --dry-run --Werror
+        run: make fmt-check
 
   build:
     name: Debug build
