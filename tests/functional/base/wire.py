@@ -60,7 +60,7 @@ class RawJFPWire:
     def __init__(self, testcase, host: str = "127.0.0.1") -> None:
         self._testcase = testcase
         self._host = host
-        self._port = testcase.config.server.port
+        self._port = testcase.config().server.port
         self._sock: socket.socket | None = None
         testcase.addCleanup(self.close)
 

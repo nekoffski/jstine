@@ -49,6 +49,14 @@ class ClientHarness:
         exists = self.client.exists(key=key)
         assert_that(exists).is_equal_to(expected)
 
+    def assert_set(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float
+    ) -> None:
+        resp = self.client.set(key=key, value=value)
+        assert_that(resp).is_true()
+
     def assert_overwrite(
         self,
         key: bytes | bytearray | memoryview | str | int | float,

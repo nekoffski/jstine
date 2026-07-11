@@ -5,13 +5,6 @@
 
 namespace jstine {
 
-using Value = Bytes;
-
-struct Metadata {};
-
-class _Value {
-   public:
-   private:
-};
+class KeyHasher : public NonCopyable, public NonMovable {};
 
 }  // namespace jstine

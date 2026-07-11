@@ -5,8 +5,14 @@
 
 namespace jstine {
 
-Reaper::Reaper(const Config& config, Keyspace& keyspace)
-    : Thread("StorageReaper"), m_config(config), m_keyspace(keyspace) {}
+Reaper::Reaper(
+    const Config& config, Keyspace& keyspace,
+    const ExpirationRegistry& expirationRegistry
+)
+    : Thread("StorageReaper"),
+      m_config(config),
+      m_keyspace(keyspace),
+      m_expirationRegistry(expirationRegistry) {}
 
 void Reaper::cancel() {
     m_running = false;

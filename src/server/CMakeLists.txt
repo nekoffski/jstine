@@ -28,11 +28,14 @@ add_library(jstined_lib STATIC
     "proto/impl/JFP.cpp"
     # -- storage
     "storage/StorageEngine.cpp"
+    "storage/ExpirationRegistry.cpp"
     "storage/Keyspace.cpp"
+    "storage/Key.cpp"
+    "storage/Value.cpp"
     "storage/Database.cpp"
     "storage/Reaper.cpp"
     "storage/keyspace/std/StdKeyspace.cpp"
-
+    "storage/hash/FNV.cpp"
 )
 
 target_include_directories(jstined_lib

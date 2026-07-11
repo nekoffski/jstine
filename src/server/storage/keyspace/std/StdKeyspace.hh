@@ -8,21 +8,9 @@
 #include "core/Core.hh"
 #include "core/Error.hh"
 #include "storage/Keyspace.hh"
+#include "storage/hash/FNV.hh"
 
 namespace jstine {
-
-struct VecU8Hash {
-    size_t operator()(const std::vector<uint8_t>& v) const noexcept {
-        size_t hash = 1469598103934665603ull;  // FNV offset basis
-
-        for (uint8_t b : v) {
-            hash ^= static_cast<size_t>(b);
-            hash *= 1099511628211ull;  // FNV prime
-        }
-
-        return hash;
-    }
-};
 
 class StdKeyspace : public Keyspace {
    public:
@@ -32,7 +20,7 @@ class StdKeyspace : public Keyspace {
     Result<Value> get(const Key& key) const override;
 
    private:
-    std::unordered_map<Key, Value, VecU8Hash> m_storage;
+    std::unordered_map<Key, Value, FNVKeyHashFunctor> m_storage;
     mutable std::shared_mutex m_storageMutex;
 };
 

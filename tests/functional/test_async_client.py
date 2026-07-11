@@ -59,18 +59,18 @@ class TestAsyncClientFunctional(TestCase):
         await h.assert_exists(key=key, expected=False)
 
     async def test_context_manager(self):
-        async with AsyncClient(port=self.config.server.port) as client:
+        async with AsyncClient(port=self.config().server.port) as client:
             assert_that(await client.ping(b"ctx")).is_equal_to(b"ctx")
             assert_that(await client.delete(b"missing:key")).is_false()
 
     async def test_close_is_idempotent(self):
-        client = AsyncClient(port=self.config.server.port)
+        client = AsyncClient(port=self.config().server.port)
         await client.connect()
         await client.close()
         await client.close()
 
     async def test_reconnect_after_close(self):
-        client = AsyncClient(port=self.config.server.port)
+        client = AsyncClient(port=self.config().server.port)
         await client.connect()
         await client.close()
         await client.connect()

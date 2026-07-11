@@ -54,18 +54,18 @@ class TestClientFunctional(TestCase):
         self.h.assert_exists(key=key, expected=False)
 
     def test_context_manager(self):
-        with Client(port=self.config.server.port) as client:
+        with Client(port=self.config().server.port) as client:
             assert_that(client.ping(b"ctx")).is_equal_to(b"ctx")
             assert_that(client.delete(b"missing:key")).is_false()
 
     def test_close_is_idempotent(self):
-        client = Client(port=self.config.server.port)
+        client = Client(port=self.config().server.port)
         client.connect()
         client.close()
         client.close()
 
     def test_reconnect_after_close(self):
-        client = Client(port=self.config.server.port)
+        client = Client(port=self.config().server.port)
         client.connect()
         client.close()
         client.connect()

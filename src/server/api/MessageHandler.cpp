@@ -22,7 +22,7 @@ Response MessageHandler::Dispatcher::operator()(const PingRequestBody& body) {
 
 Response MessageHandler::Dispatcher::operator()(const SetRequestBody& body) {
     JSTINE_PROFILE_REGION("SetRequest");
-    if (auto err = m_database.set(body.key, body.value); err) {
+    if (auto err = m_database.set(Key{body.key}, body.value); err) {
         return Response::error(*err);
     }
     return Response::ok();
@@ -30,7 +30,7 @@ Response MessageHandler::Dispatcher::operator()(const SetRequestBody& body) {
 
 Response MessageHandler::Dispatcher::operator()(const GetRequestBody& body) {
     JSTINE_PROFILE_REGION("GetRequest");
-    if (auto value = m_database.get(body.key); value) {
+    if (auto value = m_database.get(Key{body.key}); value) {
         return Response::ok(*value);
     } else {
         return Response::error(value.error());
@@ -39,17 +39,18 @@ Response MessageHandler::Dispatcher::operator()(const GetRequestBody& body) {
 
 Response MessageHandler::Dispatcher::operator()(const DelRequestBody& body) {
     JSTINE_PROFILE_REGION("DelRequest");
-    if (not m_database.exists(body.key)) {
+    Key key{body.key};
+    if (not m_database.exists(key)) {
         return Response::error(ErrorCode::notFound, "Key does not exist");
     }
 
-    m_database.remove(body.key);
+    m_database.remove(key);
     return Response::ok();
 }
 
 Response MessageHandler::Dispatcher::operator()(const ExistsRequestBody& body) {
     JSTINE_PROFILE_REGION("ExistsRequest");
-    if (m_database.exists(body.key)) {
+    if (m_database.exists(Key{body.key})) {
         return Response::ok();
     }
     return Response::error(ErrorCode::notFound, "Key does not exist");

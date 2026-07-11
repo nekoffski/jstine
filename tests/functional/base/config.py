@@ -14,28 +14,71 @@ class ConfigError(ValueError):
     pass
 
 
-@dataclass(slots=True)
+def _load_toml(path: Path | str, description: str) -> dict:
+    config_path = Path(path)
+    if not config_path.is_file():
+        raise ConfigError(
+            f"{description} config file does not exist: {config_path}")
+
+    raw = config_path.read_text(encoding="utf-8").replace(
+        "{cwd}", str(Path.cwd())
+    )
+    return tomllib.loads(raw)
+
+
+@dataclass
+class ApiConfig:
+    port: int
+    concurrency: int
+
+
+@dataclass
+class StorageConfig:
+    keyspace: str
+    default_expiration_seconds: int
+    reaper_interval_seconds: int
+
+
+@dataclass
+class LogConfig:
+    level: str
+
+
+@dataclass
+class ServerRuntimeConfig:
+    api: ApiConfig
+    storage: StorageConfig
+    log: LogConfig
+
+    @classmethod
+    def load(cls, path: Path | str = DEFAULT_SERVER_CONFIG_PATH) -> "ServerRuntimeConfig":
+        data = _load_toml(path, "Server")
+
+        return cls(
+            api=ApiConfig(**data["api"]),
+            storage=StorageConfig(
+                keyspace=data["storage"]["keyspace"],
+                default_expiration_seconds=data["storage"]["defaultExpirationSeconds"],
+                reaper_interval_seconds=data["storage"]["reaperIntervalSeconds"],
+            ),
+            log=LogConfig(**data["log"]),
+        )
+
+
+@dataclass
 class ServerConfig:
     binary: Path
     config_path: Path = DEFAULT_SERVER_CONFIG_PATH
     port: int = 9991
 
 
-@dataclass(slots=True)
+@dataclass
 class Config:
     server: ServerConfig
 
     @classmethod
     def load(cls, path: Path | str = DEFAULT_CONFIG_PATH) -> "Config":
-        config_path = Path(path)
-        if not config_path.is_file():
-            raise ConfigError(
-                f"Test config file does not exist: {config_path}")
-
-        raw = config_path.read_text(encoding="utf-8").replace(
-            "{cwd}", str(Path.cwd())
-        )
-        data = tomllib.loads(raw)
+        data = _load_toml(path, "Test")
 
         server_data = data.get("server")
         if not isinstance(server_data, dict):

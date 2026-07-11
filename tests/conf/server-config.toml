@@ -4,8 +4,8 @@ concurrency = 4
 
 [storage]
 keyspace = "std"
-defaultExpirationSeconds = 3600
-reaperIntervalSeconds = 120
+defaultExpirationSeconds = 5
+reaperIntervalSeconds = 5
 
 [log]
 level = "info"
