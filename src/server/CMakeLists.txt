@@ -34,7 +34,7 @@ add_library(jstined_lib STATIC
     "storage/Value.cpp"
     "storage/Database.cpp"
     "storage/Reaper.cpp"
-    "storage/keyspace/std/StdKeyspace.cpp"
+    "storage/keyspace/StdKeyspace.cpp"
     "storage/hash/FNV.cpp"
 )
 

@@ -12,9 +12,7 @@ class ExpirationRegistry : public NonCopyable, public NonMovable {
    public:
     void expiresAfter(const Key& key, std::chrono::seconds duration);
 
-    bool expired(
-        const Key& key, const Clock::time_point& now = Clock::now()
-    ) const;
+    bool expired(const Key& key, const Clock::time_point& now = Clock::now());
 
    private:
     std::unordered_map<Key, Clock::time_point, FNVKeyHashFunctor> m_expirations;

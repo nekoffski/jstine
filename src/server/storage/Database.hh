@@ -18,10 +18,10 @@ class Database : public NonCopyable, public NonMovable {
         ExpirationRegistry& expirationRegistry
     );
 
-    bool exists(const Key& key) const;
-    void remove(const Key& key);
-    Opt<Error> set(const Key& key, const Value& value);
-    Result<Value> get(const Key& key) const;
+    bool exists(const Bytes& keyBytes) const;
+    void remove(const Bytes& keyBytes);
+    Opt<Error> set(const Bytes& keyBytes, const Bytes& valueBytes);
+    Result<Bytes> get(const Bytes& keyBytes) const;
 
    private:
     const Config& m_config;

@@ -14,7 +14,7 @@ void StdKeyspace::remove(const Key& key) {
 
 Opt<Error> StdKeyspace::set(const Key& key, const Value& value) {
     std::unique_lock lk{m_storageMutex};
-    m_storage[key] = value;
+    m_storage.insert_or_assign(key, value);
     return {};
 }
 

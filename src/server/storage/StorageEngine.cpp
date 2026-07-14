@@ -1,6 +1,6 @@
 #include "StorageEngine.hh"
 
-#include "keyspace/std/StdKeyspace.hh"
+#include "keyspace/StdKeyspace.hh"
 
 namespace jstine {
 

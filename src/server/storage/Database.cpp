@@ -10,7 +10,9 @@ Database::Database(
       m_keyspace(keyspace),
       m_expirationRegistry(expirationRegistry) {}
 
-bool Database::exists(const Key& key) const {
+bool Database::exists(const Bytes& keyBytes) const {
+    Key key{keyBytes};
+
     if (m_expirationRegistry.expired(key)) {
         m_keyspace.remove(key);
         return false;
@@ -18,24 +20,40 @@ bool Database::exists(const Key& key) const {
     return m_keyspace.exists(key);
 }
 
-void Database::remove(const Key& key) { m_keyspace.remove(key); }
+void Database::remove(const Bytes& keyBytes) {
+    m_keyspace.remove(Key{keyBytes});
+}
 
-Opt<Error> Database::set(const Key& key, const Value& value) {
-    if (auto err = m_keyspace.set(key, value); err) {
+Opt<Error> Database::set(const Bytes& keyBytes, const Bytes& valueBytes) {
+    Key key{keyBytes};
+
+    auto value = Value::fromBytes(valueBytes);
+
+    if (not value) {
+        return value.error();
+    }
+
+    if (auto err = m_keyspace.set(key, *value); err) {
         return err;
     }
+
     m_expirationRegistry.expiresAfter(
         key, m_config.storage().defaultExpiration
     );
     return Error::empty();
 }
 
-Result<Value> Database::get(const Key& key) const {
+Result<Bytes> Database::get(const Bytes& keyBytes) const {
+    Key key{keyBytes};
     if (m_expirationRegistry.expired(key)) {
         m_keyspace.remove(key);
         return Error::unexpected(ErrorCode::notFound, "Key has expired");
     }
-    return m_keyspace.get(key);
+    if (auto value = m_keyspace.get(key); value) {
+        return value->bytes();
+    } else {
+        return Error::unexpected(value.error());
+    }
 }
 
 }  // namespace jstine

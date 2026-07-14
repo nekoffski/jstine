@@ -8,11 +8,12 @@ void ExpirationRegistry::expiresAfter(
     m_expirations[key] = Clock::now() + duration;
 }
 
-bool ExpirationRegistry::expired(
-    const Key& key, const Clock::time_point& now
-) const {
+bool ExpirationRegistry::expired(const Key& key, const Clock::time_point& now) {
     if (auto it = m_expirations.find(key); it != m_expirations.end()) {
-        return now > it->second;
+        if (now > it->second) {
+            m_expirations.erase(it);
+            return true;
+        }
     }
     return false;
 }

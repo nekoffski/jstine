@@ -1,17 +1,47 @@
 #pragma once
 
+#include <variant>
+
 #include "core/Concepts.hh"
 #include "core/Core.hh"
+#include "core/Error.hh"
+#include "core/Time.hh"
 
 namespace jstine {
 
-using Value = Bytes;
+enum class ValueKind { str = 0, list = 1 };
 
-struct Metadata {};
+struct Metadata {
+    ValueKind kind;
+    Clock::time_point accessedAt;
+    u64 size;
+};
 
-class _Value {
+class StrValueBody {
    public:
+    explicit StrValueBody(const Bytes& bytes);
+
+    Bytes& bytes();
+    const Bytes& bytes() const;
+
    private:
+    Bytes m_bytes;
+};
+
+using ValueBody = std::variant<StrValueBody>;
+
+class Value {
+   public:
+    static Result<Value> fromBytes(const Bytes& bytes);
+
+    const Bytes& bytes() const;
+    const Metadata& metadata() const;
+
+   private:
+    explicit Value(ValueBody body);
+
+    Metadata m_metadata;
+    ValueBody m_body;
 };
 
 }  // namespace jstine
