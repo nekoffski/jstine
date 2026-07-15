@@ -4,15 +4,15 @@ import struct
 
 from assertpy import assert_that
 
-from base.case import TestCase
+from base.context import Context
 from base.wire import RawJFPWire, pack_handshake, pack_request
 from jstine._proto import FieldType, Protocol, RequestKind, ResponseKind
 from jstine.errors import ErrorCode
 
 
-class TestRawSocketFunctional(TestCase):
-    def test_ping_roundtrip(self):
-        wire = RawJFPWire(self).open()
+def test_ping_roundtrip(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         kind, fields = wire.request(
@@ -22,9 +22,13 @@ class TestRawSocketFunctional(TestCase):
 
         assert_that(kind).is_equal_to(ResponseKind.ok)
         assert_that(fields).contains((FieldType.payload, b"Hello wire!"))
+    finally:
+        wire.close()
 
-    def test_fragmented_request_roundtrip(self):
-        wire = RawJFPWire(self).open()
+
+def test_fragmented_request_roundtrip(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         set_frame = pack_request(
@@ -50,9 +54,13 @@ class TestRawSocketFunctional(TestCase):
         )
         assert_that(kind).is_equal_to(ResponseKind.ok)
         assert_that(fields).contains((FieldType.payload, b"value"))
+    finally:
+        wire.close()
 
-    def test_multiple_requests_on_same_connection(self):
-        wire = RawJFPWire(self).open()
+
+def test_multiple_requests_on_same_connection(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         kind, fields = wire.request(
@@ -82,9 +90,13 @@ class TestRawSocketFunctional(TestCase):
         )
         assert_that(kind).is_equal_to(ResponseKind.ok)
         assert_that(fields).contains((FieldType.payload, b"second"))
+    finally:
+        wire.close()
 
-    def test_delete_missing_returns_not_found_error(self):
-        wire = RawJFPWire(self).open()
+
+def test_delete_missing_returns_not_found_error(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         kind, fields = wire.request(
@@ -105,33 +117,53 @@ class TestRawSocketFunctional(TestCase):
                 "utf-8"
             )
         ).is_equal_to("Key does not exist")
+    finally:
+        wire.close()
 
-    def test_rejects_invalid_handshake_magic(self):
-        wire = RawJFPWire(self).open()
+
+def test_rejects_invalid_handshake_magic(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.send(pack_handshake(magic=0))
         wire.wait_for_close()
+    finally:
+        wire.close()
 
-    def test_rejects_invalid_handshake_protocol(self):
-        wire = RawJFPWire(self).open()
+
+def test_rejects_invalid_handshake_protocol(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.send(struct.pack("<II8s", 999, 0xDEADBEEF, bytes(8)))
         wire.wait_for_close()
+    finally:
+        wire.close()
 
-    def test_rejects_unknown_request_kind(self):
-        wire = RawJFPWire(self).open()
+
+def test_rejects_unknown_request_kind(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         wire.send(struct.pack("<II", 4, 999))
         wire.wait_for_close()
+    finally:
+        wire.close()
 
-    def test_rejects_truncated_field_header(self):
-        wire = RawJFPWire(self).open()
+
+def test_rejects_truncated_field_header(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         wire.send(struct.pack("<II", 5, int(RequestKind.ping)) + b"\x01")
         wire.wait_for_close()
+    finally:
+        wire.close()
 
-    def test_rejects_field_data_out_of_bounds(self):
-        wire = RawJFPWire(self).open()
+
+def test_rejects_field_data_out_of_bounds(ctx: Context) -> None:
+    wire = RawJFPWire(ctx).open()
+    try:
         wire.handshake()
 
         wire.send(
@@ -141,3 +173,5 @@ class TestRawSocketFunctional(TestCase):
             + b"abc"
         )
         wire.wait_for_close()
+    finally:
+        wire.close()

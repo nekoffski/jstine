@@ -11,14 +11,11 @@ from assertpy import assert_that
 class ClientHarness:
     def __init__(
         self,
-        testcase,
+        context,
         client: Client | None = None,
-        add_cleanup: bool = True,
     ) -> None:
-        self.client = client or testcase.client()
+        self.client = client or context.client()
         self.client.connect()
-        if add_cleanup:
-            testcase.addCleanup(self.close)
 
     def close(self) -> None:
         self.client.close()
@@ -106,14 +103,11 @@ class AsyncClientHarness:
     @classmethod
     async def create(
         cls,
-        testcase,
+        context,
         client: AsyncClient | None = None,
-        add_cleanup: bool = True,
     ) -> "AsyncClientHarness":
-        instance = cls(client or testcase.async_client())
+        instance = cls(client or context.async_client())
         await instance.client.connect()
-        if add_cleanup:
-            testcase.addAsyncCleanup(instance.close)
         return instance
 
     async def close(self) -> None:

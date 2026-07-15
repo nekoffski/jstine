@@ -1,12 +1,68 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
+
 import pytest
+import pytest_asyncio
 
 from base.artifacts import TestArtifacts
+from base.context import Context
+from base.config import Config, ServerRuntimeConfig
+from base.harness import AsyncClientHarness, ClientHarness
+from base.server import Server
 from base.system import System
 
 
 System.os()
+
+
+@pytest.fixture
+def ctx(request: pytest.FixtureRequest) -> Context:
+    test_config = Config.load()
+    runtime_config = ServerRuntimeConfig.load(test_config.server.config_path)
+    artifacts = TestArtifacts.for_nodeid(request.node.nodeid)
+    artifacts.clear()
+    request.node._functional_artifacts = artifacts
+    return Context(
+        test_config=test_config,
+        runtime_config=runtime_config,
+        artifacts=artifacts,
+    )
+
+
+@pytest.fixture(autouse=True)
+def server(ctx: Context) -> Iterator[Server]:
+    instance = Server(
+        ctx.config().server.binary,
+        port=ctx.config().server.port,
+        config_path=ctx.config().server.config_path,
+        artifacts=ctx.artifacts,
+    )
+    ctx.server = instance
+    instance.start()
+    try:
+        yield instance
+    finally:
+        instance.stop()
+        ctx.server = None
+
+
+@pytest.fixture
+def client_harness(ctx: Context) -> Iterator[ClientHarness]:
+    harness = ClientHarness(ctx)
+    try:
+        yield harness
+    finally:
+        harness.close()
+
+
+@pytest_asyncio.fixture
+async def async_client_harness(ctx: Context) -> AsyncIterator[AsyncClientHarness]:
+    harness = await AsyncClientHarness.create(ctx)
+    try:
+        yield harness
+    finally:
+        await harness.close()
 
 
 def _artifacts_for(item) -> TestArtifacts:

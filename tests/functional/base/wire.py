@@ -57,12 +57,10 @@ def unpack_response(data: bytes) -> tuple[ResponseKind, list[tuple[FieldType, by
 
 
 class RawJFPWire:
-    def __init__(self, testcase, host: str = "127.0.0.1") -> None:
-        self._testcase = testcase
+    def __init__(self, context, host: str = "127.0.0.1") -> None:
         self._host = host
-        self._port = testcase.config().server.port
+        self._port = context.config().server.port
         self._sock: socket.socket | None = None
-        testcase.addCleanup(self.close)
 
     def open(self) -> "RawJFPWire":
         if self._sock is not None:

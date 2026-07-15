@@ -1,4 +1,4 @@
 assertpy
 pytest
+pytest-asyncio
 psutil
-ddt

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import re
 import shutil
+from hashlib import sha1
 from dataclasses import dataclass
 from pathlib import Path
 
 
 LOGS_ROOT = Path.cwd() / "logs"
+MAX_LOG_DIR_NAME_LENGTH = 120
 
 
 def canonical_test_name(name: str) -> str:
@@ -19,7 +21,13 @@ def canonical_test_name(name: str) -> str:
 
 def _sanitize(name: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9_.-]+", "_", name)
-    return cleaned.strip("._") or "test"
+    cleaned = cleaned.strip("._") or "test"
+    if len(cleaned) <= MAX_LOG_DIR_NAME_LENGTH:
+        return cleaned
+
+    digest = sha1(cleaned.encode("utf-8")).hexdigest()[:12]
+    prefix_length = MAX_LOG_DIR_NAME_LENGTH - len(digest) - 1
+    return f"{cleaned[:prefix_length].rstrip('._')}_{digest}"
 
 
 def test_log_dir(name: str, root: Path = LOGS_ROOT) -> Path:
