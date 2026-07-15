@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <unordered_map>
 
 #include "Key.hh"
@@ -16,6 +17,7 @@ class ExpirationRegistry : public NonCopyable, public NonMovable {
 
    private:
     std::unordered_map<Key, Clock::time_point, FNVKeyHashFunctor> m_expirations;
+    std::mutex m_expirationsMutex;
 };
 
 }  // namespace jstine

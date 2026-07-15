@@ -7,6 +7,7 @@ from .recorder import Recorder
 from .runner import ProcessResult, ThreadResult
 from .types import BenchmarkInitHook, BenchmarkOperation, Client, Operation
 from .worker import WorkerDefinition, WorkerFactory, WorkerInstance
+from .utils import Random, Sequence
 
 __all__ = [
     "Benchmark",
@@ -25,4 +26,6 @@ __all__ = [
     "WorkerDefinition",
     "WorkerFactory",
     "WorkerInstance",
+    "Random",
+    "Sequence",
 ]
