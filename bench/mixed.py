@@ -5,7 +5,12 @@ bench = Benchmark("mixed")
 
 
 @bench.worker(tag="setter", default=1)
-def setter(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperation:
+def setter(
+    client: Client,
+    worker_id: int,
+    record: Recorder,
+    tags: dict[str, int],
+) -> BenchmarkOperation:
     key = f"key:bench:mixed:{worker_id}"
     value = f"value:bench:mixed:{worker_id}"
 
@@ -18,7 +23,12 @@ def setter(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperati
 
 
 @bench.worker(tag="getter", default=50)
-def getter(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperation:
+def getter(
+    client: Client,
+    worker_id: int,
+    record: Recorder,
+    tags: dict[str, int],
+) -> BenchmarkOperation:
     key = f"key:bench:not_existing:{worker_id}"
 
     def operation() -> None:
@@ -30,7 +40,12 @@ def getter(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperati
 
 
 @bench.worker(tag="set_get", default=0)
-def set_get(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperation:
+def set_get(
+    client: Client,
+    worker_id: int,
+    record: Recorder,
+    tags: dict[str, int],
+) -> BenchmarkOperation:
     key = f"key:bench:set_get:{worker_id}"
     value = f"value:bench:set_get:{worker_id}"
 

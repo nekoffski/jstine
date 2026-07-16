@@ -1,0 +1,64 @@
+{
+  "scripts": [
+    {
+      "name": "setter_50_100_10000",
+      "bench": "setter.py",
+      "tags": { "setter": 50, "distinct_keys": 100, "value_size": 10000 }
+    },
+    {
+      "name": "setter_50_100_1000",
+      "bench": "setter.py",
+      "tags": { "setter": 50, "distinct_keys": 100, "value_size": 1000 }
+    },
+    {
+      "name": "setter_50_100_100",
+      "bench": "setter.py",
+      "tags": { "setter": 50, "distinct_keys": 100, "value_size": 100 }
+    },
+    {
+      "name": "setter_50_10_1000",
+      "bench": "setter.py",
+      "tags": { "setter": 50, "distinct_keys": 10, "value_size": 1000 }
+    },
+    {
+      "name": "setter_50_1_1000",
+      "bench": "setter.py",
+      "tags": { "setter": 50, "distinct_keys": 1, "value_size": 1000 }
+    },
+    {
+      "name": "setter_50_1_10000",
+      "bench": "setter.py",
+      "tags": { "setter": 50, "distinct_keys": 1, "value_size": 10000 }
+    },
+    {
+      "name": "setter_5_100_10000",
+      "bench": "setter.py",
+      "tags": { "setter": 5, "distinct_keys": 100, "value_size": 10000 }
+    },
+    {
+      "name": "setter_5_100_1000",
+      "bench": "setter.py",
+      "tags": { "setter": 5, "distinct_keys": 100, "value_size": 1000 }
+    },
+    {
+      "name": "setter_5_100_100",
+      "bench": "setter.py",
+      "tags": { "setter": 5, "distinct_keys": 100, "value_size": 100 }
+    },
+    {
+      "name": "setter_5_10_1000",
+      "bench": "setter.py",
+      "tags": { "setter": 5, "distinct_keys": 10, "value_size": 1000 }
+    },
+    {
+      "name": "setter_5_1_1000",
+      "bench": "setter.py",
+      "tags": { "setter": 5, "distinct_keys": 1, "value_size": 1000 }
+    },
+    {
+      "name": "setter_5_1_10000",
+      "bench": "setter.py",
+      "tags": { "setter": 5, "distinct_keys": 1, "value_size": 10000 }
+    }
+  ]
+}

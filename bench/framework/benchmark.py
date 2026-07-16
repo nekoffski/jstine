@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import multiprocessing
 from collections.abc import Callable
+from pathlib import Path
 
 import jstine
 
 from .metrics import Metrics
 from .process import ProcessSampler
-from .reporting import print_metrics, print_parameters, print_process_metrics
+from .reporting import print_metrics, print_process_metrics
 from .runner import ProcessResult, run_process
 from .types import BenchmarkInitHook
 from .worker import WorkerDefinition, WorkerFactory, WorkerInstance
@@ -53,23 +55,13 @@ class Benchmark:
 
     def main(self) -> None:
         args = self._parse_args()
-        worker_counts = self._worker_counts(args.workers)
+        worker_counts, run_tags = self._parse_tags(args.tags)
         instances = self._worker_instances(worker_counts)
         if not instances:
             raise SystemExit("no workers configured")
-        active_tags = self._active_tags(worker_counts)
+        active_tags = self._active_tags(worker_counts, run_tags)
 
         process_count = min(args.processes, len(instances))
-        print_parameters(
-            host=args.host,
-            port=args.port,
-            duration=args.duration,
-            processes=process_count,
-            workers=worker_counts,
-            pid=args.pid,
-            process_sample_interval=args.process_sample_interval,
-        )
-
         if self._init is not None:
             with jstine.Client(host=args.host, port=args.port) as client:
                 self._init(client, active_tags)
@@ -90,6 +82,7 @@ class Benchmark:
                     args.host,
                     args.port,
                     args.duration,
+                    active_tags,
                     instances[i::process_count],
                     queue,
                 ),
@@ -121,10 +114,22 @@ class Benchmark:
         if error is not None:
             raise SystemExit(error)
 
-        print_metrics(metrics, args.duration)
+        print_metrics(metrics, args.duration, args.name)
         if process_metrics is not None:
-            print()
-            print_process_metrics(process_metrics)
+            if args.process_metrics_output == "stdout":
+                print()
+                print_process_metrics(process_metrics)
+            elif args.process_metrics_output == "file":
+                if args.process_metrics_file is None:
+                    raise SystemExit(
+                        "--process-metrics-file is required when "
+                        "--process-metrics-output=file"
+                    )
+                path = Path(args.process_metrics_file)
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with path.open("w", encoding="utf-8") as stream:
+                    with contextlib.redirect_stdout(stream):
+                        print_process_metrics(process_metrics)
         print()
 
     def _parse_args(self) -> argparse.Namespace:
@@ -133,12 +138,19 @@ class Benchmark:
         parser.add_argument("--port", type=int, default=9991)
         parser.add_argument("--duration", type=float, default=15.0)
         parser.add_argument("--processes", type=int, default=1)
+        parser.add_argument("--name", default=self.name)
         parser.add_argument("--pid", type=int, default=None)
         parser.add_argument("--process-sample-interval", type=float, default=0.25)
         parser.add_argument(
-            "--workers",
+            "--process-metrics-output",
+            choices=("stdout", "file"),
+            default="stdout",
+        )
+        parser.add_argument("--process-metrics-file", default=None)
+        parser.add_argument(
+            "--tags",
             default=None,
-            help="comma-separated worker counts, for example setter=1,getter=50",
+            help="comma-separated tag counts, for example setter=1,getter=50",
         )
         args = parser.parse_args()
 
@@ -153,32 +165,39 @@ class Benchmark:
 
         return args
 
-    def _worker_counts(self, raw: str | None) -> dict[str, int]:
-        counts = {worker.tag: worker.default for worker in self._workers}
+    def _parse_tags(self, raw: str | None) -> tuple[dict[str, int], dict[str, int]]:
+        default_counts = {worker.tag: worker.default for worker in self._workers}
         if raw is None:
-            return counts
+            return default_counts, {}
 
-        known_tags = set(counts)
-        counts = dict.fromkeys(known_tags, 0)
+        known_tags = set(default_counts)
+        parsed_tags: dict[str, int] = {}
         for part in raw.split(","):
             tag, sep, count_text = part.partition("=")
             if not sep:
-                raise SystemExit(f"invalid --workers item: {part}")
-            if tag not in known_tags:
-                raise SystemExit(f"unknown worker tag: {tag}")
+                raise SystemExit(f"invalid --tags item: {part}")
 
             try:
                 count = int(count_text)
             except ValueError as exc:
                 raise SystemExit(
-                    f"invalid worker count for {tag}: {count_text}"
+                    f"invalid tag count for {tag}: {count_text}"
                 ) from exc
 
             if count < 0:
-                raise SystemExit(f"worker count must be non-negative: {tag}")
-            counts[tag] = count
+                raise SystemExit(f"tag count must be non-negative: {tag}")
+            parsed_tags[tag] = count
 
-        return counts
+        worker_tags = known_tags & set(parsed_tags)
+        counts = (
+            dict.fromkeys(known_tags, 0)
+            if worker_tags
+            else default_counts.copy()
+        )
+        for tag in worker_tags:
+            counts[tag] = parsed_tags[tag]
+
+        return counts, parsed_tags
 
     def _worker_instances(self, counts: dict[str, int]) -> list[WorkerInstance]:
         instances: list[WorkerInstance] = []
@@ -187,8 +206,12 @@ class Benchmark:
                 instances.append(WorkerInstance(definition, index))
         return instances
 
-    def _active_tags(self, counts: dict[str, int]) -> dict[str, int]:
-        return {
+    def _active_tags(
+        self,
+        counts: dict[str, int],
+        tags: dict[str, int],
+    ) -> dict[str, int]:
+        return tags | {
             definition.tag: counts[definition.tag]
             for definition in self._workers
             if counts[definition.tag] > 0

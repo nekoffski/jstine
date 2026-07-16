@@ -21,6 +21,7 @@ def run_process(
     host: str,
     port: int,
     duration: float,
+    active_tags: dict[str, int],
     instances: list[WorkerInstance],
     queue: multiprocessing.Queue[ProcessResult],
 ) -> None:
@@ -30,7 +31,7 @@ def run_process(
         threads = [
             threading.Thread(
                 target=_run_worker,
-                args=(host, port, deadline, instance, results),
+                args=(host, port, deadline, active_tags, instance, results),
             )
             for instance in instances
         ]
@@ -74,6 +75,7 @@ def _run_worker(
     host: str,
     port: int,
     deadline: float,
+    active_tags: dict[str, int],
     instance: WorkerInstance,
     results: _ThreadResults,
 ) -> None:
@@ -82,7 +84,9 @@ def _run_worker(
         recorder = Recorder(instance.definition.tag, metrics)
 
         with jstine.Client(host=host, port=port) as client:
-            operation = instance.definition.factory(client, instance.index, recorder)
+            operation = instance.definition.factory(
+                client, instance.index, recorder, active_tags
+            )
             while time.monotonic() < deadline:
                 operation()
 

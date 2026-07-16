@@ -8,7 +8,9 @@ from .recorder import Recorder
 from .types import BenchmarkOperation, Client
 
 
-WorkerFactory: TypeAlias = Callable[[Client, int, Recorder], BenchmarkOperation]
+WorkerFactory: TypeAlias = Callable[
+    [Client, int, Recorder, dict[str, int]], BenchmarkOperation
+]
 
 
 @dataclass(frozen=True, slots=True)

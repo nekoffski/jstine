@@ -42,6 +42,7 @@ dist/
 
 
 logs
+bench-logs
 
 .agents
 .codex

@@ -1,18 +1,24 @@
-from framework import Benchmark, BenchmarkOperation, Client, Recorder, Sequence
+from framework import Benchmark, BenchmarkOperation, Client, Recorder, Random, Sequence
 
-bench = Benchmark("setter")
+bench = Benchmark("setter-long-kv")
 
 
 @bench.worker(tag="setter", default=50)
-def setter(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperation:
-    n = 10000
+def setter(
+    client: Client,
+    worker_id: int,
+    record: Recorder,
+    tags: dict[str, int],
+) -> BenchmarkOperation:
+    n = tags.get("distinct_keys", 100)
+    vn = tags.get("value_size", 100)
 
     key_seq = Sequence.seq_generator(f"key:bench:{worker_id}", n)
-    value = f"value:bench:{worker_id}"
+    value_seq = Random.word_generator(vn, f"value:bench:{worker_id}")
 
     def operation() -> None:
         with record.set():
-            ok = client.set(next(key_seq), value)
+            ok = client.set(next(key_seq), next(value_seq))
             assert ok
 
     return operation

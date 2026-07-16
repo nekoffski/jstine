@@ -14,7 +14,12 @@ def init_hook(client: Client, config: dict[str, int]) -> None:
 
 
 @bench.worker(tag="getter", default=50)
-def getter(client: Client, worker_id: int, record: Recorder) -> BenchmarkOperation:
+def getter(
+    client: Client,
+    worker_id: int,
+    record: Recorder,
+    tags: dict[str, int],
+) -> BenchmarkOperation:
     key = f"key:bench:existing:{worker_id}"
 
     def operation() -> None:

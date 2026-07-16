@@ -4,8 +4,9 @@ from .metrics import Histogram, Metrics
 from .process import ProcessMetrics
 
 
-def print_metrics(metrics: Metrics, duration: float) -> None:
-    _print_section("Benchmark")
+def print_metrics(metrics: Metrics, duration: float, name: str | None = None) -> None:
+    title = f"Benchmark: {name}" if name is not None else "Benchmark"
+    _print_section(title)
     _print_rows(
         [
             ("total ops", _format_counter(metrics.total_ops, duration)),
