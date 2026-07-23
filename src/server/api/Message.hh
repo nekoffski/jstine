@@ -68,7 +68,7 @@ struct Response {
 
     static Response error(const Error& err);
     static Response error(ErrorCode code, const std::string& message);
-    static Response ok(const Bytes& payload = {});
+    static Response ok(std::span<const Byte> payload = {});
 };
 
 }  // namespace jstine

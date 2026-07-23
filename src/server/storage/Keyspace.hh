@@ -15,7 +15,7 @@ class Keyspace : public NonCopyable, public NonMovable {
     virtual bool exists(const Key& key) const = 0;
     virtual void remove(const Key& key) = 0;
     virtual Opt<Error> set(const Key& key, const Value& value) = 0;
-    virtual Result<Value> get(const Key& key) const = 0;
+    virtual Value* get(const Key& key) = 0;
 };
 
 }  // namespace jstine

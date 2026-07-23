@@ -18,12 +18,12 @@ Opt<Error> StdKeyspace::set(const Key& key, const Value& value) {
     return {};
 }
 
-Result<Value> StdKeyspace::get(const Key& key) const {
+Value* StdKeyspace::get(const Key& key) {
     std::shared_lock lk{m_storageMutex};
     if (auto it = m_storage.find(key); it != m_storage.end()) {
-        return it->second;
+        return &it->second;
     }
-    return Error::unexpected(ErrorCode::notFound, "Key does not exist");
+    return nullptr;
 }
 
 }  // namespace jstine

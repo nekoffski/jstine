@@ -9,6 +9,7 @@ class Key {
    public:
     explicit Key(Bytes&& bytes);
     explicit Key(const Bytes& bytes);
+    explicit Key(std::span<const Byte> bytes);
 
     const Bytes& bytes() const;
 

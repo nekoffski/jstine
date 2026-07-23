@@ -17,7 +17,7 @@ class StdKeyspace : public Keyspace {
     bool exists(const Key& key) const override;
     void remove(const Key& key) override;
     Opt<Error> set(const Key& key, const Value& value) override;
-    Result<Value> get(const Key& key) const override;
+    Value* get(const Key& key) override;
 
    private:
     std::unordered_map<Key, Value, FNVKeyHashFunctor> m_storage;

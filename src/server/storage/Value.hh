@@ -6,6 +6,7 @@
 #include "core/Core.hh"
 #include "core/Error.hh"
 #include "core/Time.hh"
+#include "mem/Allocator.hh"
 
 namespace jstine {
 
@@ -19,22 +20,32 @@ struct Metadata {
 
 class StrValueBody {
    public:
-    explicit StrValueBody(const Bytes& bytes);
+    explicit StrValueBody(std::span<const Byte> bytes, Allocator* allocator);
+    ~StrValueBody();
 
-    Bytes& bytes();
-    const Bytes& bytes() const;
+    std::span<Byte> bytes();
+    std::span<const Byte> bytes() const;
+
+    StrValueBody(StrValueBody&&) noexcept;
+    StrValueBody& operator=(StrValueBody&&) noexcept;
+
+    StrValueBody& operator=(const StrValueBody&);
 
    private:
-    Bytes m_bytes;
+    Byte* m_ptr;
+    u64 m_size;
+    Allocator* m_allocator;
 };
 
 using ValueBody = std::variant<StrValueBody>;
 
 class Value {
    public:
-    static Result<Value> fromBytes(const Bytes& bytes);
+    static Result<Value> fromBytes(
+        std::span<const Byte> bytes, Allocator& allocator
+    );
 
-    const Bytes& bytes() const;
+    std::span<const Byte> bytes() const;
     const Metadata& metadata() const;
 
    private:

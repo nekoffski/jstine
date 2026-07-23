@@ -8,6 +8,7 @@
 #include "core/Config.hh"
 #include "core/Core.hh"
 #include "core/Error.hh"
+#include "mem/Mallocator.hh"
 
 namespace jstine {
 
@@ -18,15 +19,18 @@ class Database : public NonCopyable, public NonMovable {
         ExpirationRegistry& expirationRegistry
     );
 
-    bool exists(const Bytes& keyBytes) const;
-    void remove(const Bytes& keyBytes);
-    Opt<Error> set(const Bytes& keyBytes, const Bytes& valueBytes);
-    Result<Bytes> get(const Bytes& keyBytes) const;
+    bool exists(std::span<const Byte> keyBytes) const;
+    void remove(std::span<const Byte> keyBytes);
+    Opt<Error> set(
+        std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
+    );
+    Result<std::span<const Byte>> get(std::span<const Byte> keyBytes) const;
 
    private:
     const Config& m_config;
     Keyspace& m_keyspace;
     ExpirationRegistry& m_expirationRegistry;
+    Mallocator m_mallocator;
 };
 
 }  // namespace jstine
