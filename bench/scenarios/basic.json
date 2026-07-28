@@ -1,6 +1,0 @@
-{
-  "scripts": [
-    { "name": "getter", "bench": "getter.py", "tags": {} },
-    { "name": "setter", "bench": "setter.py", "tags": {} }
-  ]
-}

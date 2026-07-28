@@ -31,13 +31,14 @@ add_library(jstined_lib STATIC
     # -- storage
     "storage/StorageEngine.cpp"
     "storage/ExpirationRegistry.cpp"
-    "storage/Keyspace.cpp"
-    "storage/Key.cpp"
-    "storage/Value.cpp"
     "storage/Database.cpp"
     "storage/Reaper.cpp"
     "storage/keyspace/StdKeyspace.cpp"
-    "storage/hash/FNV.cpp"
+    "storage/hash/FNVHash.cpp"
+    "storage/kv/Key.cpp"
+    "storage/kv/StrValue.cpp"
+    "storage/kv/ValueWrapper.cpp"
+    "storage/kv/EmptyValue.cpp"
 )
 
 target_include_directories(jstined_lib

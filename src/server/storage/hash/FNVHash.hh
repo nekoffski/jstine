@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Core.hh"
-#include "storage/Key.hh"
+#include "storage/kv/Key.hh"
 
 namespace jstine {
 

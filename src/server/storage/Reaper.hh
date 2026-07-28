@@ -4,8 +4,8 @@
 #include <mutex>
 
 #include "ExpirationRegistry.hh"
-#include "Keyspace.hh"
 #include "core/Config.hh"
+#include "keyspace/Keyspace.hh"
 #include "runtime/Thread.hh"
 
 namespace jstine {

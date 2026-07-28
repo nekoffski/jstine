@@ -3,9 +3,9 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "Key.hh"
 #include "core/Time.hh"
-#include "hash/FNV.hh"
+#include "hash/FNVHash.hh"
+#include "kv/Key.hh"
 
 namespace jstine {
 

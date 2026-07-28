@@ -15,6 +15,7 @@ enum class ErrorCode : u32 {
     connectionFailure = 9,
     notImplementedYet = 10,
     notFound = 11,
+    allocatorFailure = 12,
 };
 
 }  // namespace jstine

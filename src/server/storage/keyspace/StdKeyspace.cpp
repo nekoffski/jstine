@@ -12,18 +12,25 @@ void StdKeyspace::remove(const Key& key) {
     m_storage.erase(key);
 }
 
-Opt<Error> StdKeyspace::set(const Key& key, const Value& value) {
+Result<std::reference_wrapper<ValueWrapper>> StdKeyspace::reserve(
+    const Key& key
+) {
     std::unique_lock lk{m_storageMutex};
-    m_storage.insert_or_assign(key, value);
-    return {};
-}
 
-Result<Value> StdKeyspace::get(const Key& key) const {
-    std::shared_lock lk{m_storageMutex};
     if (auto it = m_storage.find(key); it != m_storage.end()) {
         return it->second;
+    } else {
+        m_storage.emplace(key, ValueWrapper{});
     }
-    return Error::unexpected(ErrorCode::notFound, "Key does not exist");
+    return m_storage[key];
+}
+
+ValueWrapper* StdKeyspace::get(const Key& key) {
+    std::shared_lock lk{m_storageMutex};
+    if (auto it = m_storage.find(key); it != m_storage.end()) {
+        return &it->second;
+    }
+    return nullptr;
 }
 
 }  // namespace jstine

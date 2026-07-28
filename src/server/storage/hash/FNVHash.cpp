@@ -1,4 +1,4 @@
-#include "FNV.hh"
+#include "FNVHash.hh"
 
 namespace jstine {
 

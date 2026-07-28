@@ -17,3 +17,4 @@ class ErrorCode(IntEnum):
     connectionFailure = 9
     notImplementedYet = 10
     notFound = 11
+    allocatorFailure = 12

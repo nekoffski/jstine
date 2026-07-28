@@ -4,14 +4,14 @@
 
 #include "Database.hh"
 #include "ExpirationRegistry.hh"
-#include "Key.hh"
-#include "Keyspace.hh"
 #include "Reaper.hh"
-#include "Value.hh"
 #include "core/Concepts.hh"
 #include "core/Config.hh"
 #include "core/Core.hh"
 #include "core/Error.hh"
+#include "keyspace/Keyspace.hh"
+#include "kv/Key.hh"
+#include "kv/Value.hh"
 
 namespace jstine {
 
