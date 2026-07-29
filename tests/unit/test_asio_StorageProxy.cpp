@@ -90,9 +90,7 @@ TEST(AsioStorageProxy, ReportsUnavailableStorageAfterQueueClosure) {
             auto result = co_await storage.exists(key);
             EXPECT_FALSE(result);
             if (not result) {
-                EXPECT_EQ(
-                    result.error().code(), ErrorCode::storageUnavailable
-                );
+                EXPECT_EQ(result.error().code(), ErrorCode::storageUnavailable);
             }
 
             work.reset();
