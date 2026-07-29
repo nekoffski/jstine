@@ -6,7 +6,7 @@ namespace jstine {
 
 class EmptyValue {
    public:
-    std::span<const Byte> bytes() const;
+    CBytesView bytes() const;
 };
 
 }  // namespace jstine

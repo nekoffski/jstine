@@ -4,9 +4,7 @@ namespace jstine {
 
 ValueWrapper::ValueWrapper() : m_value(EmptyValue{}) {}
 
-Opt<Error> ValueWrapper::set(
-    std::span<const Byte> bytes, Allocator& allocator
-) {
+Opt<Error> ValueWrapper::set(CBytesView bytes, Allocator& allocator) {
     if (auto value = StrValue::parse(&allocator, bytes); not value) {
         return value.error();
     } else {
@@ -15,12 +13,9 @@ Opt<Error> ValueWrapper::set(
     return Error::empty();
 }
 
-std::span<const Byte> ValueWrapper::bytes() const {
+CBytesView ValueWrapper::bytes() const {
     return std::visit(
-        [](const auto& value) -> std::span<const Byte> {
-            return value.bytes();
-        },
-        m_value
+        [](const auto& value) -> CBytesView { return value.bytes(); }, m_value
     );
 }
 

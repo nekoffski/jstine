@@ -19,15 +19,13 @@ class Database : public NonCopyable, public NonMovable {
         ExpirationRegistry& expirationRegistry
     );
 
-    bool exists(std::span<const Byte> keyBytes) const;
+    bool exists(CBytesView keyBytes) const;
 
-    bool remove(const std::vector<std::span<const Byte>>& keyBytesList);
+    bool remove(const std::vector<CBytesView>& keyBytesList);
 
-    Opt<Error> set(
-        std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
-    );
+    Opt<Error> set(CBytesView keyBytes, CBytesView valueBytes);
 
-    Result<std::span<const Byte>> get(std::span<const Byte> keyBytes) const;
+    Result<CBytesView> get(CBytesView keyBytes) const;
 
    private:
     const Config& m_config;

@@ -18,20 +18,20 @@ struct CommandBase {
 };
 
 struct GetCommand : CommandBase<Bytes> {
-    std::span<const Byte> keyBytes;
+    CBytesView keyBytes;
 };
 
 struct SetCommand : CommandBase<void> {
-    std::span<const Byte> keyBytes;
-    std::span<const Byte> valueBytes;
+    CBytesView keyBytes;
+    CBytesView valueBytes;
 };
 
 struct RemoveCommand : CommandBase<void> {
-    std::vector<std::span<const Byte>> keyBytesList;
+    std::vector<CBytesView> keyBytesList;
 };
 
 struct ExistsCommand : CommandBase<bool> {
-    std::span<const Byte> keyBytes;
+    CBytesView keyBytes;
 };
 
 using Command =

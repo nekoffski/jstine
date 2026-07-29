@@ -12,14 +12,14 @@ class AsioStorageProxy : public NonCopyable, public NonMovable {
    public:
     explicit AsioStorageProxy(StorageCommandQueue& commandQueue);
 
-    asio::awaitable<Result<bool>> exists(std::span<const Byte> keyBytes) const;
-    asio::awaitable<Result<void>> remove(std::span<const Byte> keyBytes);
+    asio::awaitable<Result<bool>> exists(CBytesView keyBytes) const;
+    asio::awaitable<Result<void>> remove(CBytesView keyBytes);
 
     asio::awaitable<Result<void>> set(
-        std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
+        CBytesView keyBytes, CBytesView valueBytes
     );
 
-    asio::awaitable<Result<Bytes>> get(std::span<const Byte> keyBytes) const;
+    asio::awaitable<Result<Bytes>> get(CBytesView keyBytes) const;
 
    private:
     StorageCommandQueue& m_commandQueue;

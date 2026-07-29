@@ -11,9 +11,9 @@ class ValueWrapper : public NonCopyable {
    public:
     explicit ValueWrapper();
 
-    Opt<Error> set(std::span<const Byte> bytes, Allocator& allocator);
+    Opt<Error> set(CBytesView bytes, Allocator& allocator);
 
-    std::span<const Byte> bytes() const;
+    CBytesView bytes() const;
     const Metadata& metadata() const;
 
    private:

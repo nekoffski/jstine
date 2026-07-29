@@ -11,7 +11,7 @@ using namespace jstine;
 
 namespace {
 
-void appendField(Bytes& frame, JFPFieldType type, std::span<const Byte> data) {
+void appendField(Bytes& frame, JFPFieldType type, CBytesView data) {
     frame.push_back(static_cast<u8>(type));
     const u32 size = static_cast<u32>(data.size());
     const auto* sizeBytes = reinterpret_cast<const Byte*>(&size);

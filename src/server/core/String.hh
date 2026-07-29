@@ -46,15 +46,15 @@ std::string toBinaryString(T value) {
     return std::bitset<sizeof(T) * 8>(value).to_string();
 }
 
-std::string toBinaryString(std::span<const Byte> bytes);
+std::string toBinaryString(CBytesView bytes);
 
 template <std::unsigned_integral T>
 std::string toHexString(T value) {
     return fmt::format("{:0{}x}", value, sizeof(T) * 2);
 }
 
-std::string toHexString(std::span<const Byte> bytes);
+std::string toHexString(CBytesView bytes);
 
-std::string hexDump(std::span<const Byte> bytes);
+std::string hexDump(CBytesView bytes);
 
 }  // namespace jstine

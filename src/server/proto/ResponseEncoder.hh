@@ -13,9 +13,7 @@ class ResponseEncoder : public NonCopyable, public NonMovable {
    public:
     virtual ~ResponseEncoder() = default;
 
-    virtual Result<u64> encode(
-        const Response& response, std::span<Byte> bytes
-    ) = 0;
+    virtual Result<u64> encode(const Response& response, BytesView bytes) = 0;
 };
 
 }  // namespace jstine

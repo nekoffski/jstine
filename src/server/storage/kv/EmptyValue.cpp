@@ -2,6 +2,6 @@
 
 namespace jstine {
 
-std::span<const Byte> EmptyValue::bytes() const { return {}; }
+CBytesView EmptyValue::bytes() const { return {}; }
 
 }  // namespace jstine

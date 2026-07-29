@@ -39,25 +39,21 @@ ResultType submit(StorageCommandQueue& commandQueue, CommandType command) {
 StorageProxy::StorageProxy(StorageCommandQueue& commandQueue)
     : m_commandQueue(commandQueue) {}
 
-Result<bool> StorageProxy::exists(std::span<const Byte> keyBytes) const {
+Result<bool> StorageProxy::exists(CBytesView keyBytes) const {
     ExistsCommand command{};
     command.keyBytes = keyBytes;
 
     return submit<Result<bool>>(m_commandQueue, std::move(command));
 }
 
-Result<void> StorageProxy::remove(
-    const std::vector<std::span<const Byte>>& keyBytesList
-) {
+Result<void> StorageProxy::remove(const std::vector<CBytesView>& keyBytesList) {
     RemoveCommand command{};
     command.keyBytesList = keyBytesList;
 
     return submit<Result<void>>(m_commandQueue, std::move(command));
 }
 
-Result<void> StorageProxy::set(
-    std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
-) {
+Result<void> StorageProxy::set(CBytesView keyBytes, CBytesView valueBytes) {
     SetCommand command{};
     command.keyBytes = keyBytes;
     command.valueBytes = valueBytes;
@@ -65,7 +61,7 @@ Result<void> StorageProxy::set(
     return submit<Result<void>>(m_commandQueue, std::move(command));
 }
 
-Result<Bytes> StorageProxy::get(std::span<const Byte> keyBytes) const {
+Result<Bytes> StorageProxy::get(CBytesView keyBytes) const {
     GetCommand command{};
     command.keyBytes = keyBytes;
 

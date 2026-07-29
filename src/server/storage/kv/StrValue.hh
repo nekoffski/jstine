@@ -9,11 +9,9 @@ namespace jstine {
 
 class StrValue : public NonCopyable {
    public:
-    std::span<const Byte> bytes() const;
+    CBytesView bytes() const;
 
-    static Result<StrValue> parse(
-        Allocator* allocator, std::span<const Byte> input
-    );
+    static Result<StrValue> parse(Allocator* allocator, CBytesView input);
 
     StrValue(StrValue&& other) noexcept;
     StrValue& operator=(StrValue&& other) noexcept;

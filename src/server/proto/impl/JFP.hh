@@ -40,7 +40,7 @@ enum class JFPFieldType : u8 {
 
 class JFPRequestDecoder : public RequestDecoder {
    public:
-    void feed(std::span<const Byte> bytes) override;
+    void feed(CBytesView bytes) override;
     Result<Request> decode() override;
 
    private:
@@ -49,7 +49,7 @@ class JFPRequestDecoder : public RequestDecoder {
 
 class JFPResponseEncoder : public ResponseEncoder {
    public:
-    Result<u64> encode(const Response& response, std::span<Byte> out) override;
+    Result<u64> encode(const Response& response, BytesView out) override;
 };
 
 }  // namespace jstine

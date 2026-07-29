@@ -51,7 +51,7 @@ AsioStorageProxy::AsioStorageProxy(StorageCommandQueue& commandQueue)
     : m_commandQueue(commandQueue) {}
 
 asio::awaitable<Result<bool>> AsioStorageProxy::exists(
-    std::span<const Byte> keyBytes
+    CBytesView keyBytes
 ) const {
     ExistsCommand command{};
     command.keyBytes = keyBytes;
@@ -59,9 +59,7 @@ asio::awaitable<Result<bool>> AsioStorageProxy::exists(
     co_return co_await submit<Result<bool>>(m_commandQueue, std::move(command));
 }
 
-asio::awaitable<Result<void>> AsioStorageProxy::remove(
-    std::span<const Byte> keyBytes
-) {
+asio::awaitable<Result<void>> AsioStorageProxy::remove(CBytesView keyBytes) {
     RemoveCommand command{};
     command.keyBytesList = {keyBytes};
 
@@ -69,7 +67,7 @@ asio::awaitable<Result<void>> AsioStorageProxy::remove(
 }
 
 asio::awaitable<Result<void>> AsioStorageProxy::set(
-    std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
+    CBytesView keyBytes, CBytesView valueBytes
 ) {
     SetCommand command{};
     command.keyBytes = keyBytes;
@@ -79,7 +77,7 @@ asio::awaitable<Result<void>> AsioStorageProxy::set(
 }
 
 asio::awaitable<Result<Bytes>> AsioStorageProxy::get(
-    std::span<const Byte> keyBytes
+    CBytesView keyBytes
 ) const {
     GetCommand command{};
     command.keyBytes = keyBytes;

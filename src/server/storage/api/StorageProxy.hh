@@ -13,14 +13,12 @@ class StorageProxy : public NonCopyable, public NonMovable {
    public:
     explicit StorageProxy(StorageCommandQueue& commandQueue);
 
-    Result<bool> exists(std::span<const Byte> keyBytes) const;
-    Result<void> remove(const std::vector<std::span<const Byte>>& keyBytesList);
+    Result<bool> exists(CBytesView keyBytes) const;
+    Result<void> remove(const std::vector<CBytesView>& keyBytesList);
 
-    Result<void> set(
-        std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
-    );
+    Result<void> set(CBytesView keyBytes, CBytesView valueBytes);
 
-    Result<Bytes> get(std::span<const Byte> keyBytes) const;
+    Result<Bytes> get(CBytesView keyBytes) const;
 
    private:
     StorageCommandQueue& m_commandQueue;

@@ -2,13 +2,9 @@
 
 namespace jstine {
 
-std::span<const Byte> StrValue::bytes() const {
-    return std::span{m_bytes, m_size};
-}
+CBytesView StrValue::bytes() const { return std::span{m_bytes, m_size}; }
 
-Result<StrValue> StrValue::parse(
-    Allocator* allocator, std::span<const Byte> input
-) {
+Result<StrValue> StrValue::parse(Allocator* allocator, CBytesView input) {
     auto ptr = static_cast<Byte*>(allocator->allocate(input.size()));
 
     if (not ptr) {

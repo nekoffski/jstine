@@ -14,7 +14,7 @@ MessageCodec::MessageCodec(Protocol protocol) : m_protocol(protocol) {
     }
 }
 
-void MessageCodec::feed(std::span<const Byte> bytes) {
+void MessageCodec::feed(CBytesView bytes) {
     JSTINE_PROFILE_FUNCTION();
     m_decoder->feed(bytes);
 }
@@ -24,9 +24,7 @@ Result<Request> MessageCodec::decode() {
     return m_decoder->decode();
 }
 
-Result<u64> MessageCodec::encode(
-    const Response& response, std::span<Byte> bytes
-) {
+Result<u64> MessageCodec::encode(const Response& response, BytesView bytes) {
     JSTINE_PROFILE_FUNCTION();
     return m_encoder->encode(response, bytes);
 }

@@ -23,7 +23,7 @@ Response Response::error(ErrorCode code, const std::string& message) {
     };
 }
 
-Response Response::ok(std::span<const Byte> payload) {
+Response Response::ok(CBytesView payload) {
     // todo: should not copy payload here
     return Response{
         ResponseKind::ok, OkResponseBody{Bytes(payload.begin(), payload.end())}

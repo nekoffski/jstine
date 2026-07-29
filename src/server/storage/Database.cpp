@@ -10,7 +10,7 @@ Database::Database(
       m_keyspace(keyspace),
       m_expirationRegistry(expirationRegistry) {}
 
-bool Database::exists(std::span<const Byte> keyBytes) const {
+bool Database::exists(CBytesView keyBytes) const {
     Key key{keyBytes};
 
     if (m_expirationRegistry.expired(key)) {
@@ -20,16 +20,14 @@ bool Database::exists(std::span<const Byte> keyBytes) const {
     return m_keyspace.exists(key);
 }
 
-bool Database::remove(const std::vector<std::span<const Byte>>& keyBytesList) {
+bool Database::remove(const std::vector<CBytesView>& keyBytesList) {
     for (const auto& keyBytes : keyBytesList) {
         m_keyspace.remove(Key{keyBytes});
     }
     return true;
 }
 
-Opt<Error> Database::set(
-    std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
-) {
+Opt<Error> Database::set(CBytesView keyBytes, CBytesView valueBytes) {
     Key key{keyBytes};
 
     auto maybeWrapper = m_keyspace.reserve(key);
@@ -50,9 +48,7 @@ Opt<Error> Database::set(
     return Error::empty();
 }
 
-Result<std::span<const Byte>> Database::get(
-    std::span<const Byte> keyBytes
-) const {
+Result<CBytesView> Database::get(CBytesView keyBytes) const {
     Key key{keyBytes};
     if (m_expirationRegistry.expired(key)) {
         m_keyspace.remove(key);

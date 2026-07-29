@@ -41,7 +41,7 @@ std::optional<std::string> extensionFromPath(
     return {};
 }
 
-std::string toBinaryString(std::span<const Byte> bytes) {
+std::string toBinaryString(CBytesView bytes) {
     std::string result;
     result.reserve(bytes.size() * 8);
     for (const auto byte : bytes) {
@@ -50,7 +50,7 @@ std::string toBinaryString(std::span<const Byte> bytes) {
     return result;
 }
 
-std::string toHexString(std::span<const Byte> bytes) {
+std::string toHexString(CBytesView bytes) {
     std::string result;
     result.reserve(bytes.size() * 2);
     for (const auto byte : bytes) {
@@ -59,7 +59,7 @@ std::string toHexString(std::span<const Byte> bytes) {
     return result;
 }
 
-std::string hexDump(std::span<const Byte> bytes) {
+std::string hexDump(CBytesView bytes) {
     std::string hex;
     std::string ascii;
     hex.reserve(bytes.size() * 3);

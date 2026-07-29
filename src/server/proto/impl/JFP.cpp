@@ -24,7 +24,7 @@ u32 readU32(const Byte* p) {
 
 void writeU32(Byte* p, u32 v) { std::memcpy(p, &v, sizeof(v)); }
 
-void appendField(Bytes& out, JFPFieldType type, std::span<const Byte> data) {
+void appendField(Bytes& out, JFPFieldType type, CBytesView data) {
     out.push_back(static_cast<u8>(type));
     u32 size = static_cast<u32>(data.size());
     const auto* sb = reinterpret_cast<const Byte*>(&size);
@@ -51,7 +51,7 @@ Result<const Bytes*> require(
     return f;
 }
 
-Result<FieldMap> parseFields(std::span<const Byte> data) {
+Result<FieldMap> parseFields(CBytesView data) {
     FieldMap fields;
     const Byte* pos = data.data();
     const Byte* end = pos + data.size();
@@ -163,7 +163,7 @@ Bytes serializeBody(const Response& response) {
 
 }  // namespace
 
-void JFPRequestDecoder::feed(std::span<const Byte> bytes) {
+void JFPRequestDecoder::feed(CBytesView bytes) {
     m_buf.insert(m_buf.end(), bytes.begin(), bytes.end());
 }
 
@@ -205,7 +205,7 @@ Result<Request> JFPRequestDecoder::decode() {
 }
 
 Result<u64> JFPResponseEncoder::encode(
-    const Response& response, std::span<Byte> out
+    const Response& response, BytesView out
 ) {
     const Bytes fields = serializeBody(response);
     const u32 payloadSize = static_cast<u32>(4 + fields.size());
