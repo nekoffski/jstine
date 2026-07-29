@@ -10,7 +10,7 @@ StorageEngine::StorageEngine(const Config& config)
       m_database(config, *m_keyspace, m_expirationRegistry),
       m_reaper(config, *m_keyspace, m_expirationRegistry) {}
 
-Database& StorageEngine::database() { return m_database; }
+Storage& StorageEngine::storage() { return m_database; }
 
 void StorageEngine::start() { m_reaper.start(); }
 

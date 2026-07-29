@@ -3,14 +3,14 @@
 #include "Message.hh"
 #include "core/Concepts.hh"
 #include "core/Core.hh"
-#include "storage/Database.hh"
+#include "storage/Storage.hh"
 
 namespace jstine {
 
 class MessageHandler : public NonCopyable, public NonMovable {
     class Dispatcher : public NonCopyable, public NonMovable {
        public:
-        explicit Dispatcher(Database& database);
+        explicit Dispatcher(Storage& storage);
 
         Response operator()(const PingRequestBody& body);
         Response operator()(const SetRequestBody& body);
@@ -19,11 +19,11 @@ class MessageHandler : public NonCopyable, public NonMovable {
         Response operator()(const ExistsRequestBody& body);
 
        private:
-        Database& m_database;
+        Storage& m_storage;
     };
 
    public:
-    explicit MessageHandler(Database& database);
+    explicit MessageHandler(Storage& storage);
 
     Response onRequest(const Request& request);
 

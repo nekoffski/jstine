@@ -19,7 +19,7 @@ class StorageEngine : public NonCopyable, public NonMovable {
    public:
     explicit StorageEngine(const Config& config);
 
-    Database& database();
+    Storage& storage();
 
     void start();
     void stop();
