@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <memory>
 #include <vector>
 
 #include "core/Functional.hh"
@@ -32,4 +33,26 @@ TEST(FunctionalTests, LazyEvaluationDefersExecution) {
     EXPECT_EQ(calls, 0);
     EXPECT_EQ(static_cast<int>(lazy), 1);
     EXPECT_EQ(calls, 1);
+}
+
+TEST(FunctionalTests, MoveOnlyFunctionMovesAndInvokesMoveOnlyCallables) {
+    auto value = std::make_unique<int>(41);
+    MoveOnlyFunction<int(int)> function{
+        [value = std::move(value)](int increment) { return *value + increment; }
+    };
+
+    EXPECT_FALSE(value);
+    EXPECT_EQ(function(1), 42);
+
+    auto moved = std::move(function);
+    EXPECT_FALSE(function);
+    EXPECT_TRUE(moved);
+    EXPECT_EQ(moved(1), 42);
+}
+
+TEST(FunctionalTests, EmptyMoveOnlyFunctionThrows) {
+    MoveOnlyFunction<void()> function;
+
+    EXPECT_FALSE(function);
+    EXPECT_THROW(function(), std::bad_function_call);
 }

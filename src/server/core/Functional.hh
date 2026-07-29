@@ -1,11 +1,103 @@
 #pragma once
 
+#include <concepts>
 #include <functional>
+#include <memory>
 #include <ranges>
+#include <type_traits>
+#include <utility>
 
 #include "Concepts.hh"
 
 namespace jstine {
+
+template <typename Signature>
+class MoveOnlyFunction;
+
+template <typename ReturnType, typename... ArgumentTypes>
+class MoveOnlyFunction<ReturnType(ArgumentTypes...)> {
+   private:
+    struct CallableBase {
+        virtual ~CallableBase() = default;
+        virtual ReturnType invoke(ArgumentTypes&&... arguments) = 0;
+    };
+
+    template <typename Callable>
+    struct CallableModel final : CallableBase {
+        explicit CallableModel(Callable&& callable)
+            : callable(std::forward<Callable>(callable)) {}
+
+        ReturnType invoke(ArgumentTypes&&... arguments) override {
+            if constexpr (std::is_void_v<ReturnType>) {
+                std::invoke(
+                    callable, std::forward<ArgumentTypes>(arguments)...
+                );
+            } else {
+                return std::invoke(
+                    callable, std::forward<ArgumentTypes>(arguments)...
+                );
+            }
+        }
+
+        Callable callable;
+    };
+
+   public:
+    MoveOnlyFunction() = default;
+    MoveOnlyFunction(std::nullptr_t) {}
+
+    template <typename Callable>
+        requires(
+            not std::same_as<std::remove_cvref_t<Callable>, MoveOnlyFunction> &&
+            std::is_constructible_v<std::decay_t<Callable>, Callable &&> &&
+            std::is_invocable_r_v<
+                ReturnType, std::decay_t<Callable>&, ArgumentTypes...>
+        )
+    MoveOnlyFunction(Callable&& callable)
+        : m_callable(
+              std::make_unique<CallableModel<std::decay_t<Callable>>>(
+                  std::forward<Callable>(callable)
+              )
+          ) {}
+
+    MoveOnlyFunction(const MoveOnlyFunction&) = delete;
+    MoveOnlyFunction& operator=(const MoveOnlyFunction&) = delete;
+    MoveOnlyFunction(MoveOnlyFunction&&) noexcept = default;
+    MoveOnlyFunction& operator=(MoveOnlyFunction&&) noexcept = default;
+
+    MoveOnlyFunction& operator=(std::nullptr_t) noexcept {
+        m_callable.reset();
+        return *this;
+    }
+
+    template <typename Callable>
+        requires(
+            not std::same_as<std::remove_cvref_t<Callable>, MoveOnlyFunction> &&
+            std::is_constructible_v<std::decay_t<Callable>, Callable &&> &&
+            std::is_invocable_r_v<
+                ReturnType, std::decay_t<Callable>&, ArgumentTypes...>
+        )
+    MoveOnlyFunction& operator=(Callable&& callable) {
+        MoveOnlyFunction replacement(std::forward<Callable>(callable));
+        *this = std::move(replacement);
+        return *this;
+    }
+
+    explicit operator bool() const noexcept {
+        return static_cast<bool>(m_callable);
+    }
+
+    ReturnType operator()(ArgumentTypes... arguments) {
+        if (not m_callable) {
+            throw std::bad_function_call{};
+        }
+
+        return m_callable->invoke(std::forward<ArgumentTypes>(arguments)...);
+    }
+
+   private:
+    std::unique_ptr<CallableBase> m_callable;
+};
 
 namespace details {
 

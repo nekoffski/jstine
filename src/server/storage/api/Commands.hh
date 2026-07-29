@@ -1,10 +1,10 @@
 #pragma once
 
-#include <functional>
 #include <optional>
 #include <variant>
 
 #include "core/Error.hh"
+#include "core/Functional.hh"
 #include "storage/kv/Key.hh"
 #include "storage/kv/Value.hh"
 
@@ -12,7 +12,7 @@ namespace jstine {
 
 template <typename ReturnType>
 struct CommandBase {
-    using Callback = std::move_only_function<void(Result<ReturnType>)>;
+    using Callback = MoveOnlyFunction<void(Result<ReturnType>)>;
 
     Callback callback;
 };
