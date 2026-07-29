@@ -46,9 +46,11 @@ Result<bool> StorageProxy::exists(std::span<const Byte> keyBytes) const {
     return submit<Result<bool>>(m_commandQueue, std::move(command));
 }
 
-Result<void> StorageProxy::remove(std::span<const Byte> keyBytes) {
+Result<void> StorageProxy::remove(
+    const std::vector<std::span<const Byte>>& keyBytesList
+) {
     RemoveCommand command{};
-    command.keyBytes = keyBytes;
+    command.keyBytesList = keyBytesList;
 
     return submit<Result<void>>(m_commandQueue, std::move(command));
 }

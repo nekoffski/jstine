@@ -27,7 +27,7 @@ struct SetCommand : CommandBase<void> {
 };
 
 struct RemoveCommand : CommandBase<void> {
-    std::span<const Byte> keyBytes;
+    std::vector<std::span<const Byte>> keyBytesList;
 };
 
 struct ExistsCommand : CommandBase<bool> {

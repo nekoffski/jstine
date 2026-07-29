@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include "ExpirationRegistry.hh"
+#include "api/StorageProxy.hh"
 #include "core/Config.hh"
 #include "keyspace/Keyspace.hh"
 #include "runtime/Thread.hh"
@@ -14,7 +15,7 @@ class Reaper : public Thread {
    public:
     explicit Reaper(
         const Config& config, Keyspace& keyspace,
-        const ExpirationRegistry& expirationRegistry
+        const ExpirationRegistry& expirationRegistry, StorageProxy& storageProxy
     );
 
     void cancel() override;
@@ -27,6 +28,7 @@ class Reaper : public Thread {
     const Config& m_config;
     Keyspace& m_keyspace;
     const ExpirationRegistry& m_expirationRegistry;
+    StorageProxy& m_storageProxy;
 
     std::mutex m_mutex;
     std::condition_variable m_cv;

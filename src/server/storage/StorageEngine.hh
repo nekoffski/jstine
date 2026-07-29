@@ -8,6 +8,7 @@
 #include "api/Commands.hh"
 #include "api/StorageCommandQueue.hh"
 #include "api/StorageExecutor.hh"
+#include "api/StorageProxy.hh"
 #include "core/Concepts.hh"
 #include "core/Config.hh"
 #include "core/Core.hh"
@@ -33,6 +34,7 @@ class StorageEngine : public NonCopyable, public NonMovable {
 
     ThreadSafeQueue<Command> m_commandQueueInternal;
     StorageCommandQueue m_commandQueue;
+    StorageProxy m_storageProxy;
     std::unique_ptr<Keyspace> m_keyspace;
     ExpirationRegistry m_expirationRegistry;
     Database m_database;

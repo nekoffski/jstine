@@ -106,6 +106,10 @@ Opt<Error> readFields(Config& c, const Reader& reader) {
         c.storage().defaultExpiration, "storage", "defaultExpirationSeconds",
         u16, std::chrono::seconds
     );
+    READ_FIELD(
+        c.storage().maxReaperRemovalsPerRun, "storage",
+        "maxReaperRemovalsPerRun", u16
+    );
 
     return Error::empty();
 }

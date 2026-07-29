@@ -7,12 +7,13 @@ namespace jstine {
 
 Reaper::Reaper(
     const Config& config, Keyspace& keyspace,
-    const ExpirationRegistry& expirationRegistry
+    const ExpirationRegistry& expirationRegistry, StorageProxy& storageProxy
 )
     : Thread("StorageReaper"),
       m_config(config),
       m_keyspace(keyspace),
-      m_expirationRegistry(expirationRegistry) {}
+      m_expirationRegistry(expirationRegistry),
+      m_storageProxy(storageProxy) {}
 
 void Reaper::cancel() {
     m_running = false;
@@ -41,6 +42,29 @@ void Reaper::run() {
     }
 }
 
-void Reaper::reap() {}
+void Reaper::reap() {
+    const auto reapLimit = m_config.storage().maxReaperRemovalsPerRun;
+    std::vector<CBytesView> keysToReap;
+    keysToReap.reserve(reapLimit);
+
+    auto now = Clock::now();
+
+    m_expirationRegistry.forEach(
+        [&](const auto& key, const auto& deadline) -> bool {
+            if (keysToReap.size() >= reapLimit) {
+                return false;
+            }
+            if (deadline <= now) {
+                keysToReap.push_back(key.bytes());
+            }
+            return true;
+        }
+    );
+
+    if (auto size = keysToReap.size(); size > 0) {
+        log::info("Reaper found {} keys to remove", size);
+        m_storageProxy.remove(keysToReap);
+    }
+}
 
 }  // namespace jstine

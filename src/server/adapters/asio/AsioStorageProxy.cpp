@@ -63,7 +63,7 @@ asio::awaitable<Result<void>> AsioStorageProxy::remove(
     std::span<const Byte> keyBytes
 ) {
     RemoveCommand command{};
-    command.keyBytes = keyBytes;
+    command.keyBytesList = {keyBytes};
 
     co_return co_await submit<Result<void>>(m_commandQueue, std::move(command));
 }

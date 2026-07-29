@@ -14,7 +14,7 @@ class StorageProxy : public NonCopyable, public NonMovable {
     explicit StorageProxy(StorageCommandQueue& commandQueue);
 
     Result<bool> exists(std::span<const Byte> keyBytes) const;
-    Result<void> remove(std::span<const Byte> keyBytes);
+    Result<void> remove(const std::vector<std::span<const Byte>>& keyBytesList);
 
     Result<void> set(
         std::span<const Byte> keyBytes, std::span<const Byte> valueBytes

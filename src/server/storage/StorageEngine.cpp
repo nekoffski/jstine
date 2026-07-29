@@ -7,10 +7,11 @@ namespace jstine {
 StorageEngine::StorageEngine(const Config& config)
     : m_config(config),
       m_commandQueue(m_commandQueueInternal),
+      m_storageProxy(m_commandQueue),
       m_keyspace(std::make_unique<StdKeyspace>()),
       m_database(config, *m_keyspace, m_expirationRegistry),
       m_executor(m_database, m_commandQueueInternal),
-      m_reaper(config, *m_keyspace, m_expirationRegistry) {}
+      m_reaper(config, *m_keyspace, m_expirationRegistry, m_storageProxy) {}
 
 StorageCommandQueue& StorageEngine::commandQueue() { return m_commandQueue; }
 

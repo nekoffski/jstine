@@ -38,7 +38,7 @@ void StorageExecutor::execute(SetCommand&& command) {
 }
 
 void StorageExecutor::execute(RemoveCommand&& command) {
-    m_database.remove(command.keyBytes);
+    m_database.remove(command.keyBytesList);
     command.callback({});
 }
 

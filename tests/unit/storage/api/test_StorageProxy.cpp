@@ -25,7 +25,7 @@ TEST_F(StorageProxyTest, ExecutesCommandsOnStorageExecutor) {
         EXPECT_TRUE(*exists);
     }
 
-    EXPECT_TRUE(storage.remove(key));
+    EXPECT_TRUE(storage.remove({key}));
 
     auto missing = storage.exists(key);
     EXPECT_TRUE(missing);

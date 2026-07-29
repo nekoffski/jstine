@@ -32,6 +32,9 @@ using Str = std::string;
 using Byte = u8;
 using Bytes = std::vector<Byte>;
 
+using BytesView = std::span<Byte>;
+using CBytesView = std::span<const Byte>;
+
 template <typename T>
 T max() {
     return std::numeric_limits<T>::max();

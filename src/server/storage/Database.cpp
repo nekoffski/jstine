@@ -20,8 +20,10 @@ bool Database::exists(std::span<const Byte> keyBytes) const {
     return m_keyspace.exists(key);
 }
 
-bool Database::remove(std::span<const Byte> keyBytes) {
-    m_keyspace.remove(Key{keyBytes});
+bool Database::remove(const std::vector<std::span<const Byte>>& keyBytesList) {
+    for (const auto& keyBytes : keyBytesList) {
+        m_keyspace.remove(Key{keyBytes});
+    }
     return true;
 }
 

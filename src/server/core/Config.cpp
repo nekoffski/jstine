@@ -101,6 +101,12 @@ void Config::overrideFields(int argc, char** argv) {
         "Storage default expiration in seconds"
     );
 
+    app.add_option(
+        "--storage-max-reaper-removals-per-run",
+        m_storage.maxReaperRemovalsPerRun,
+        "Maximum number of reaper removals per run"
+    );
+
     app.parse(argc, argv);
 }
 
@@ -119,6 +125,10 @@ void logFields(const Config& cfg) {
     log::info(
         "\tstorage.defaultExpiration = {} seconds",
         cfg.storage().defaultExpiration.count()
+    );
+    log::info(
+        "\tstorage.maxReaperRemovalsPerRun = {}",
+        cfg.storage().maxReaperRemovalsPerRun
     );
 }
 

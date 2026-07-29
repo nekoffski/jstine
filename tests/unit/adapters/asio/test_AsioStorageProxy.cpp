@@ -35,7 +35,7 @@ TEST_F(AsioStorageProxyTest, ExecutesCommandsOnStorageExecutor) {
                 EXPECT_TRUE(*exists);
             }
 
-            auto remove = co_await storage.remove(key);
+            auto remove = co_await storage.remove({key});
             EXPECT_TRUE(remove);
 
             auto missing = co_await storage.exists(key);

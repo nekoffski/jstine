@@ -20,7 +20,8 @@ class Database : public NonCopyable, public NonMovable {
     );
 
     bool exists(std::span<const Byte> keyBytes) const;
-    bool remove(std::span<const Byte> keyBytes);
+
+    bool remove(const std::vector<std::span<const Byte>>& keyBytesList);
 
     Opt<Error> set(
         std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
