@@ -1,31 +1,14 @@
 #include <gtest/gtest.h>
 
-#include <chrono>
 #include <thread>
 
 #include "adapters/asio/AsioStorageProxy.hh"
-#include "core/Config.hh"
-#include "storage/Database.hh"
-#include "storage/ExpirationRegistry.hh"
-#include "storage/api/StorageCommandQueue.hh"
-#include "storage/api/StorageExecutor.hh"
-#include "storage/keyspace/StdKeyspace.hh"
+#include "storage/StorageProxyTest.hh"
 
 namespace jstine {
 namespace {
 
-TEST(AsioStorageProxy, ExecutesCommandsOnStorageExecutor) {
-    Config config;
-    config.storage().defaultExpiration = std::chrono::seconds{60};
-
-    StdKeyspace keyspace;
-    ExpirationRegistry expirationRegistry;
-    Database database{config, keyspace, expirationRegistry};
-    ThreadSafeQueue<Command> queue;
-    StorageCommandQueue commandQueue{queue};
-    StorageExecutor executor{database, queue};
-    executor.start();
-
+TEST_F(AsioStorageProxyTest, ExecutesCommandsOnStorageExecutor) {
     asio::io_context io;
     auto work = asio::make_work_guard(io);
     auto apiThread = std::this_thread::get_id();
@@ -69,13 +52,9 @@ TEST(AsioStorageProxy, ExecutesCommandsOnStorageExecutor) {
     );
 
     io.run();
-    executor.cancel();
-    executor.join();
 }
 
-TEST(AsioStorageProxy, ReportsUnavailableStorageAfterQueueClosure) {
-    ThreadSafeQueue<Command> queue;
-    StorageCommandQueue commandQueue{queue};
+TEST_F(AsioStorageProxyTest, ReportsUnavailableStorageAfterQueueClosure) {
     queue.close();
 
     asio::io_context io;

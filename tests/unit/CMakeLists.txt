@@ -1,17 +1,28 @@
 add_executable(jstine_unit_tests
-    "test_core_Error.cpp"
-    "test_core_FileSystem.cpp"
-    "test_core_Functional.cpp"
-    "test_core_Log.cpp"
-    "test_core_OS.cpp"
-    "test_core_Scope.cpp"
-    "test_core_String.cpp"
-    "test_runtime_ThreadSafeQueue.cpp"
-    "test_asio_StorageProxy.cpp"
-    "test_proto_Message.cpp"
-    "test_proto_MessageCodec.cpp"
-    "test_proto_Protocol.cpp"
-    "test_proto_JFP.cpp"
+    # core
+    "core/test_Error.cpp"
+    "core/test_FileSystem.cpp"
+    "core/test_Functional.cpp"
+    "core/test_Log.cpp"
+    "core/test_OS.cpp"
+    "core/test_Scope.cpp"
+    "core/test_String.cpp"
+    # runtime
+    "runtime/test_ThreadSafeQueue.cpp"
+    # adapters
+    "adapters/asio/test_AsioStorageProxy.cpp"
+    # storage
+    "storage/api/test_StorageProxy.cpp"
+    # protocol
+    "proto/test_Message.cpp"
+    "proto/test_MessageCodec.cpp"
+    "proto/test_Protocol.cpp"
+    "proto/test_JFP.cpp"
+)
+
+target_include_directories(jstine_unit_tests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(jstine_unit_tests

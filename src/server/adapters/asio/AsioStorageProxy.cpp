@@ -4,18 +4,27 @@ namespace jstine {
 
 namespace {
 
+template <typename CommandType>
+void failBecauseStorageIsUnavailable(CommandType& command) {
+    command.callback(
+        Error::unexpected(
+            ErrorCode::storageUnavailable, "Storage executor is unavailable"
+        )
+    );
+}
+
 template <typename ResultType, typename CommandType>
 asio::awaitable<ResultType> submit(
     StorageCommandQueue& commandQueue, CommandType command
 ) {
-    asio::use_awaitable_t<> token;
+    auto token = asio::use_awaitable;
     co_return co_await asio::async_initiate<
         asio::use_awaitable_t<>, void(ResultType)>(
         [&commandQueue, command = std::move(command)](auto handler) mutable {
             auto executor = asio::get_associated_executor(handler);
-            command.callback = [executor, handler = std::move(handler)](
-                                   ResultType result
-                               ) mutable {
+            auto callback = [executor, handler = std::move(handler)](
+                                ResultType result
+                            ) mutable {
                 asio::post(
                     executor, [handler = std::move(handler),
                                result = std::move(result)]() mutable {
@@ -23,17 +32,13 @@ asio::awaitable<ResultType> submit(
                     }
                 );
             };
+            command.callback = std::move(callback);
 
             Command queuedCommand{std::move(command)};
-
             if (not commandQueue.push(std::move(queuedCommand))) {
-                std::get<CommandType>(queuedCommand)
-                    .callback(
-                        Error::unexpected(
-                            ErrorCode::storageUnavailable,
-                            "Storage executor is unavailable"
-                        )
-                    );
+                failBecauseStorageIsUnavailable(
+                    std::get<CommandType>(queuedCommand)
+                );
             }
         },
         token
