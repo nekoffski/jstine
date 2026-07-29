@@ -43,7 +43,7 @@ void Reaper::run() {
 }
 
 void Reaper::reap() {
-    const auto reapLimit = m_config.storage().maxReaperRemovalsPerRun;
+    const auto reapLimit = m_config.storage().reapLimitPerRun;
     std::vector<CBytesView> keysToReap;
     keysToReap.reserve(reapLimit);
 

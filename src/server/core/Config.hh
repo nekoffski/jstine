@@ -38,7 +38,7 @@ class Config {
         KeyspaceType keyspace;
         std::chrono::seconds reaperInterval;
         std::chrono::seconds defaultExpiration;
-        u16 maxReaperRemovalsPerRun;
+        u16 reapLimitPerRun;
     };
 
     const Api& api() const;

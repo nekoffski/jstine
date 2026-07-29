@@ -19,7 +19,7 @@ class ExpirationRegistry : public NonCopyable, public NonMovable {
         requires Callable<
             Callback, bool(const Key& key, const Clock::time_point& expiration)>
     void forEach(Callback&& callback) const {
-        std::lock_guard<std::mutex> lock(m_expirationsMutex);
+        std::lock_guard<std::mutex> lk{m_expirationsMutex};
         for (const auto& [key, expiration] : m_expirations) {
             if (not callback(key, expiration)) {
                 break;

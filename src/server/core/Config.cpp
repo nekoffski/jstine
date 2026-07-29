@@ -102,8 +102,7 @@ void Config::overrideFields(int argc, char** argv) {
     );
 
     app.add_option(
-        "--storage-max-reaper-removals-per-run",
-        m_storage.maxReaperRemovalsPerRun,
+        "--storage-max-reaper-removals-per-run", m_storage.reapLimitPerRun,
         "Maximum number of reaper removals per run"
     );
 
@@ -126,10 +125,7 @@ void logFields(const Config& cfg) {
         "\tstorage.defaultExpiration = {} seconds",
         cfg.storage().defaultExpiration.count()
     );
-    log::info(
-        "\tstorage.maxReaperRemovalsPerRun = {}",
-        cfg.storage().maxReaperRemovalsPerRun
-    );
+    log::info("\tstorage.reapLimitPerRun = {}", cfg.storage().reapLimitPerRun);
 }
 
 Str keyspaceTypeToString(KeyspaceType type) {

@@ -6,6 +6,7 @@ concurrency = 4
 keyspace = "std"
 defaultExpirationSeconds = 2
 reaperIntervalSeconds = 10
+reapLimitPerRun = 10
 
 [log]
 level = "info"
