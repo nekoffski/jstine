@@ -25,10 +25,12 @@ Error convertError(const std::error_code& ec) {
 
 }  // namespace
 
-AsioSession::AsioSession(asio::ip::tcp::socket socket, MessageHandler& handler)
+AsioSession::AsioSession(
+    asio::ip::tcp::socket socket, StorageCommandQueue& commandQueue
+)
     : m_socket(std::move(socket)),
-      m_ident(extractIdent(m_socket)),
-      m_messageHandler(handler) {}
+      m_messageHandler(commandQueue),
+      m_ident(extractIdent(m_socket)) {}
 
 asio::awaitable<void> AsioSession::start() {
     log::info("{} - session started", m_ident);
@@ -54,7 +56,7 @@ asio::awaitable<void> AsioSession::start() {
             co_return;
         }
 
-        auto response = m_messageHandler.onRequest(*request);
+        auto response = co_await m_messageHandler.onRequest(*request);
 
         if (auto err = co_await writeResponse(response, codec); err) {
             logError("send", *err);

@@ -2,7 +2,6 @@
 
 #include <cstring>
 
-#include "api/Message.hh"
 #include "core/Error.hh"
 
 namespace jstine {

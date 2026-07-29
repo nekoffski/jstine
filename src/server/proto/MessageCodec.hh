@@ -3,10 +3,10 @@
 #include <memory>
 #include <span>
 
+#include "Message.hh"
 #include "Protocol.hh"
 #include "RequestDecoder.hh"
 #include "ResponseEncoder.hh"
-#include "api/Message.hh"
 #include "core/Concepts.hh"
 #include "core/Core.hh"
 #include "core/Error.hh"

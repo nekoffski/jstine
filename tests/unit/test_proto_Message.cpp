@@ -3,7 +3,7 @@
 #include <string>
 #include <variant>
 
-#include "api/Message.hh"
+#include "proto/Message.hh"
 
 using namespace jstine;
 

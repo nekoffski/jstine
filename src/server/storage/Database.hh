@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ExpirationRegistry.hh"
-#include "Storage.hh"
 #include "core/Concepts.hh"
 #include "core/Config.hh"
 #include "core/Core.hh"
@@ -13,23 +12,21 @@
 
 namespace jstine {
 
-class Database : public Storage {
+class Database : public NonCopyable, public NonMovable {
    public:
     explicit Database(
         const Config& config, Keyspace& keyspace,
         ExpirationRegistry& expirationRegistry
     );
 
-    bool exists(std::span<const Byte> keyBytes) const override;
-    void remove(std::span<const Byte> keyBytes) override;
+    bool exists(std::span<const Byte> keyBytes) const;
+    bool remove(std::span<const Byte> keyBytes);
 
     Opt<Error> set(
         std::span<const Byte> keyBytes, std::span<const Byte> valueBytes
-    ) override;
+    );
 
-    Result<std::span<const Byte>> get(
-        std::span<const Byte> keyBytes
-    ) const override;
+    Result<std::span<const Byte>> get(std::span<const Byte> keyBytes) const;
 
    private:
     const Config& m_config;

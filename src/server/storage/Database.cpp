@@ -20,8 +20,9 @@ bool Database::exists(std::span<const Byte> keyBytes) const {
     return m_keyspace.exists(key);
 }
 
-void Database::remove(std::span<const Byte> keyBytes) {
+bool Database::remove(std::span<const Byte> keyBytes) {
     m_keyspace.remove(Key{keyBytes});
+    return true;
 }
 
 Opt<Error> Database::set(

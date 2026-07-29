@@ -2,7 +2,7 @@
 
 #include <span>
 
-#include "api/Message.hh"
+#include "Message.hh"
 #include "core/Concepts.hh"
 #include "core/Core.hh"
 #include "core/Error.hh"

@@ -6,6 +6,8 @@ add_executable(jstine_unit_tests
     "test_core_OS.cpp"
     "test_core_Scope.cpp"
     "test_core_String.cpp"
+    "test_runtime_ThreadSafeQueue.cpp"
+    "test_asio_StorageProxy.cpp"
     "test_proto_Message.cpp"
     "test_proto_MessageCodec.cpp"
     "test_proto_Protocol.cpp"

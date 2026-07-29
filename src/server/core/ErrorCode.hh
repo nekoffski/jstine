@@ -16,6 +16,7 @@ enum class ErrorCode : u32 {
     notImplementedYet = 10,
     notFound = 11,
     allocatorFailure = 12,
+    storageUnavailable = 13,
 };
 
 }  // namespace jstine

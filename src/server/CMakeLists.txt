@@ -4,11 +4,10 @@ add_library(jstined_lib STATIC
     "adapters/TomlConfigReader.cpp"
     "adapters/asio/AsioServer.cpp"
     "adapters/asio/AsioSession.cpp"
+    "adapters/asio/AsioMessageHandler.cpp"
+    "adapters/asio/AsioStorageProxy.cpp"
     "adapters/platform/Platform.cpp"
     "adapters/platform/unix/Signal.cpp"
-    # -- api
-    "api/MessageHandler.cpp"
-    "api/Message.cpp"
     # -- core
     "core/Config.cpp"
     "core/Core.cpp"
@@ -26,6 +25,7 @@ add_library(jstined_lib STATIC
     "proto/Protocol.cpp"
     "proto/impl/RESP.cpp"
     "proto/impl/JFP.cpp"
+    "proto/Message.cpp"
     # -- mem
     "mem/Mallocator.cpp"
     # -- storage
@@ -39,6 +39,8 @@ add_library(jstined_lib STATIC
     "storage/kv/StrValue.cpp"
     "storage/kv/ValueWrapper.cpp"
     "storage/kv/EmptyValue.cpp"
+    "storage/api/StorageExecutor.cpp"
+    "storage/api/StorageCommandQueue.cpp"
 )
 
 target_include_directories(jstined_lib

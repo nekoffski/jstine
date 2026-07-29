@@ -3,12 +3,13 @@
 #include <array>
 
 #include "Asio.hh"
-#include "api/Message.hh"
-#include "api/MessageHandler.hh"
+#include "AsioMessageHandler.hh"
 #include "core/Concepts.hh"
 #include "core/Core.hh"
+#include "proto/Message.hh"
 #include "proto/MessageCodec.hh"
 #include "proto/Protocol.hh"
+#include "storage/api/StorageCommandQueue.hh"
 
 namespace jstine {
 
@@ -16,7 +17,9 @@ class AsioSession : public NonCopyable, public NonMovable {
    public:
     using Buffer = std::array<Byte, 1024>;
 
-    explicit AsioSession(asio::ip::tcp::socket socket, MessageHandler& handler);
+    explicit AsioSession(
+        asio::ip::tcp::socket socket, StorageCommandQueue& commandQueue
+    );
 
     asio::awaitable<void> start();
 
@@ -35,8 +38,8 @@ class AsioSession : public NonCopyable, public NonMovable {
     asio::awaitable<Result<Protocol>> establishProtocol();
 
     asio::ip::tcp::socket m_socket;
+    AsioMessageHandler m_messageHandler;
     Str m_ident;
-    MessageHandler& m_messageHandler;
     Buffer m_buffer;
 };
 

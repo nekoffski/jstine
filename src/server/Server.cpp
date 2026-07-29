@@ -6,9 +6,7 @@
 namespace jstine {
 
 Server::Server(const ServerContext& context)
-    : m_context(context),
-      m_storageEngine(context.config),
-      m_messageHandler(m_storageEngine.storage()) {}
+    : m_context(context), m_storageEngine(context.config) {}
 
 Opt<Error> Server::run() {
     if (auto err = initSignals(); err) {
@@ -29,7 +27,9 @@ Opt<Error> Server::run() {
 }
 
 void Server::buildServices() {
-    m_threadGroup.add<AsioServer>(m_context.config, m_messageHandler);
+    m_threadGroup.add<AsioServer>(
+        m_context.config, m_storageEngine.commandQueue()
+    );
 }
 
 Opt<Error> Server::initSignals() {
