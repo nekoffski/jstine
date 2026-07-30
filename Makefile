@@ -1,4 +1,4 @@
-.PHONY: all build build-release build-debug test clean fmt fmt-check gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test \
+.PHONY: all build build-release build-debug test coverage clean fmt fmt-check gen_server_errors gen_python_errors gen sdk-python-build sdk-python-install sdk-python-test \
 	pre-commit
 
 CLANG_FORMAT ?= clang-format
@@ -26,6 +26,9 @@ fmt-check:
 
 test: build-debug
 	ctest --preset conan-debug --output-on-failure
+
+coverage:
+	./scripts/run_unit_coverage.sh
 
 clean:
 	rm -rf build CMakeUserPresets.json

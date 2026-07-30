@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ ! -d .test-venv ]; then
     python3 -m venv .test-venv
