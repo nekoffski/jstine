@@ -19,6 +19,9 @@ class AsioMessageHandler : public NonCopyable, public NonMovable {
         asio::awaitable<Response> operator()(const GetRequestBody& body);
         asio::awaitable<Response> operator()(const DelRequestBody& body);
         asio::awaitable<Response> operator()(const ExistsRequestBody& body);
+        asio::awaitable<Response> operator()(const TtlRequestBody& body);
+        asio::awaitable<Response> operator()(const PersistRequestBody& body);
+        asio::awaitable<Response> operator()(const ExpireRequestBody& body);
 
        private:
         AsioStorageProxy m_storageProxy;

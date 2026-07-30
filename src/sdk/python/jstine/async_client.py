@@ -10,10 +10,11 @@ from ._proto import (
     HEADER_SIZE,
     Protocol,
     RequestKind,
+    SetCondition,
     pack_handshake,
     unpack_handshake,
 )
-from .client import JstineError
+from .client import JstineError, _pack_u64
 from .errors import ErrorCode
 
 _FRAME_HEADER_SIZE = 8
@@ -76,12 +77,39 @@ class AsyncClient:
         key: bytes | bytearray | memoryview | str | int | float,
         value: bytes | bytearray | memoryview | str | int | float,
     ) -> bool:
+        return await self._set(key, value, SetCondition.none)
+
+    async def setnx(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+    ) -> bool:
+        return await self._set(key, value, SetCondition.nx)
+
+    async def setxx(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+    ) -> bool:
+        return await self._set(key, value, SetCondition.xx)
+
+    async def _set(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+        condition: SetCondition,
+    ) -> bool:
+        fields = [
+            (FieldType.key, coerce_bytes(key)),
+            (FieldType.value, coerce_bytes(value)),
+        ]
+        if condition != SetCondition.none:
+            fields.append(
+                (FieldType.set_condition, struct.pack("<B", condition))
+            )
         await self._request(
             RequestKind.set,
-            [
-                (FieldType.key, coerce_bytes(key)),
-                (FieldType.value, coerce_bytes(value)),
-            ],
+            fields,
         )
         return True
 
@@ -127,6 +155,42 @@ class AsyncClient:
             if exc.code == ErrorCode.notFound:
                 return False
             raise
+
+    async def ttl(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> int | None:
+        payload = await self._request(
+            RequestKind.ttl, [(FieldType.key, coerce_bytes(key))]
+        )
+        if not payload:
+            return None
+        if len(payload) != 8:
+            raise ValueError(
+                f"Invalid TTL response size: expected 8, got {len(payload)}"
+            )
+        return struct.unpack("<Q", payload)[0]
+
+    async def persist(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        await self._request(
+            RequestKind.persist, [(FieldType.key, coerce_bytes(key))]
+        )
+        return True
+
+    async def expire(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        seconds: int,
+    ) -> bool:
+        await self._request(
+            RequestKind.expire,
+            [
+                (FieldType.key, coerce_bytes(key)),
+                (FieldType.seconds, _pack_u64(seconds, "seconds")),
+            ],
+        )
+        return True
 
     async def _handshake(self) -> None:
         self._send(pack_handshake(self._protocol))

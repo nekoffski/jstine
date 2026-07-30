@@ -66,4 +66,28 @@ asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(
     co_return Response::error(ErrorCode::notFound, "Key does not exist");
 }
 
+asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(
+    const TtlRequestBody&
+) {
+    co_return Response::error(
+        ErrorCode::notImplementedYet, "TTL is not implemented yet"
+    );
+}
+
+asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(
+    const PersistRequestBody&
+) {
+    co_return Response::error(
+        ErrorCode::notImplementedYet, "PERSIST is not implemented yet"
+    );
+}
+
+asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(
+    const ExpireRequestBody&
+) {
+    co_return Response::error(
+        ErrorCode::notImplementedYet, "EXPIRE is not implemented yet"
+    );
+}
+
 }  // namespace jstine

@@ -56,3 +56,22 @@ TEST(MessageTests, ResponseErrorFromErrorObject) {
     EXPECT_EQ(body.code, static_cast<u32>(ErrorCode::notFound));
     EXPECT_EQ(body.message, Bytes({'m', 'i', 's', 's', 'i', 'n', 'g'}));
 }
+
+TEST(MessageTests, SetRequestDefaultsToNoCondition) {
+    const SetRequestBody body{Bytes{'k'}, Bytes{'v'}};
+
+    EXPECT_EQ(body.condition, SetCondition::none);
+}
+
+TEST(MessageTests, ModelsExpirationRequests) {
+    const Request ttl{RequestKind::ttl, TtlRequestBody{Bytes{'k'}}};
+    const Request persist{RequestKind::persist, PersistRequestBody{Bytes{'k'}}};
+    const Request expire{
+        RequestKind::expire, ExpireRequestBody{Bytes{'k'}, 42}
+    };
+
+    EXPECT_TRUE(std::holds_alternative<TtlRequestBody>(ttl.body));
+    EXPECT_TRUE(std::holds_alternative<PersistRequestBody>(persist.body));
+    ASSERT_TRUE(std::holds_alternative<ExpireRequestBody>(expire.body));
+    EXPECT_EQ(std::get<ExpireRequestBody>(expire.body).seconds, 42u);
+}

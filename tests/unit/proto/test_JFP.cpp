@@ -40,6 +40,12 @@ Bytes makeRequestFrame(
     return frame;
 }
 
+Bytes encodeU64(u64 value) {
+    Bytes bytes(sizeof(value));
+    std::memcpy(bytes.data(), &value, sizeof(value));
+    return bytes;
+}
+
 }  // namespace
 
 TEST(JFPTests, DecoderReportsRequestNotReadyForEmptyBuffer) {
@@ -128,6 +134,47 @@ TEST(JFPTests, DecoderParsesSetRequest) {
     EXPECT_EQ(body.value, value);
 }
 
+TEST(JFPTests, DecoderParsesSetConditions) {
+    for (const auto condition :
+         {SetCondition::none, SetCondition::nx, SetCondition::xx}) {
+        JFPRequestDecoder decoder;
+        decoder.feed(makeRequestFrame(
+            RequestKind::set, {
+                                  {JFPFieldType::key, Bytes{'k'}},
+                                  {JFPFieldType::value, Bytes{'v'}},
+                                  {
+                                      JFPFieldType::setCondition,
+                                      Bytes{static_cast<u8>(condition)},
+                                  },
+                              }
+        ));
+
+        const auto decoded = decoder.decode();
+
+        ASSERT_TRUE(decoded);
+        ASSERT_TRUE(std::holds_alternative<SetRequestBody>(decoded->body));
+        EXPECT_EQ(std::get<SetRequestBody>(decoded->body).condition, condition);
+    }
+}
+
+TEST(JFPTests, DecoderRejectsMalformedSetConditions) {
+    for (const auto& condition : {Bytes{}, Bytes{1, 2}, Bytes{3}}) {
+        JFPRequestDecoder decoder;
+        decoder.feed(makeRequestFrame(
+            RequestKind::set, {
+                                  {JFPFieldType::key, Bytes{'k'}},
+                                  {JFPFieldType::value, Bytes{'v'}},
+                                  {JFPFieldType::setCondition, condition},
+                              }
+        ));
+
+        const auto decoded = decoder.decode();
+
+        ASSERT_FALSE(decoded);
+        EXPECT_EQ(decoded.error().code(), ErrorCode::badInput);
+    }
+}
+
 TEST(JFPTests, DecoderParsesGetDeleteAndExistsRequests) {
     const Bytes key{'k', 'e', 'y'};
 
@@ -171,6 +218,72 @@ TEST(JFPTests, DecoderParsesGetDeleteAndExistsRequests) {
     }
 }
 
+TEST(JFPTests, DecoderParsesExpirationRequests) {
+    const Bytes key{'k', 'e', 'y'};
+
+    {
+        JFPRequestDecoder decoder;
+        decoder.feed(
+            makeRequestFrame(RequestKind::ttl, {{JFPFieldType::key, key}})
+        );
+
+        const auto decoded = decoder.decode();
+        ASSERT_TRUE(decoded);
+        EXPECT_EQ(decoded->kind, RequestKind::ttl);
+        ASSERT_TRUE(std::holds_alternative<TtlRequestBody>(decoded->body));
+        EXPECT_EQ(std::get<TtlRequestBody>(decoded->body).key, key);
+    }
+
+    {
+        JFPRequestDecoder decoder;
+        decoder.feed(
+            makeRequestFrame(RequestKind::persist, {{JFPFieldType::key, key}})
+        );
+
+        const auto decoded = decoder.decode();
+        ASSERT_TRUE(decoded);
+        EXPECT_EQ(decoded->kind, RequestKind::persist);
+        ASSERT_TRUE(std::holds_alternative<PersistRequestBody>(decoded->body));
+        EXPECT_EQ(std::get<PersistRequestBody>(decoded->body).key, key);
+    }
+
+    {
+        JFPRequestDecoder decoder;
+        decoder.feed(makeRequestFrame(
+            RequestKind::expire, {
+                                     {JFPFieldType::key, key},
+                                     {JFPFieldType::seconds, encodeU64(42)},
+                                 }
+        ));
+
+        const auto decoded = decoder.decode();
+        ASSERT_TRUE(decoded);
+        EXPECT_EQ(decoded->kind, RequestKind::expire);
+        ASSERT_TRUE(std::holds_alternative<ExpireRequestBody>(decoded->body));
+        const auto& body = std::get<ExpireRequestBody>(decoded->body);
+        EXPECT_EQ(body.key, key);
+        EXPECT_EQ(body.seconds, 42u);
+    }
+}
+
+TEST(JFPTests, DecoderRejectsMalformedExpireSeconds) {
+    JFPRequestDecoder decoder;
+    decoder.feed(makeRequestFrame(
+        RequestKind::expire, {
+                                 {JFPFieldType::key, Bytes{'k'}},
+                                 {JFPFieldType::seconds, Bytes{1, 2, 3, 4}},
+                             }
+    ));
+
+    const auto decoded = decoder.decode();
+
+    ASSERT_FALSE(decoded);
+    EXPECT_EQ(decoded.error().code(), ErrorCode::badInput);
+    EXPECT_EQ(
+        decoded.error().message(), "expire: seconds must be exactly 8 bytes"
+    );
+}
+
 TEST(JFPTests, DecoderReportsMissingFieldsForRequests) {
     {
         JFPRequestDecoder decoder;
@@ -212,6 +325,38 @@ TEST(JFPTests, DecoderReportsMissingFieldsForRequests) {
         ASSERT_FALSE(decoded);
         EXPECT_EQ(decoded.error().code(), ErrorCode::badInput);
         EXPECT_EQ(decoded.error().message(), "exists: missing key");
+    }
+
+    {
+        JFPRequestDecoder decoder;
+        decoder.feed(makeRequestFrame(RequestKind::ttl, {}));
+
+        const auto decoded = decoder.decode();
+        ASSERT_FALSE(decoded);
+        EXPECT_EQ(decoded.error().code(), ErrorCode::badInput);
+        EXPECT_EQ(decoded.error().message(), "ttl: missing key");
+    }
+
+    {
+        JFPRequestDecoder decoder;
+        decoder.feed(makeRequestFrame(RequestKind::persist, {}));
+
+        const auto decoded = decoder.decode();
+        ASSERT_FALSE(decoded);
+        EXPECT_EQ(decoded.error().code(), ErrorCode::badInput);
+        EXPECT_EQ(decoded.error().message(), "persist: missing key");
+    }
+
+    {
+        JFPRequestDecoder decoder;
+        decoder.feed(makeRequestFrame(
+            RequestKind::expire, {{JFPFieldType::key, Bytes{'k'}}}
+        ));
+
+        const auto decoded = decoder.decode();
+        ASSERT_FALSE(decoded);
+        EXPECT_EQ(decoded.error().code(), ErrorCode::badInput);
+        EXPECT_EQ(decoded.error().message(), "expire: missing seconds");
     }
 }
 

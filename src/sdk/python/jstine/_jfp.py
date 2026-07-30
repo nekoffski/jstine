@@ -1,7 +1,7 @@
 import struct
 
 from ._codec import Codec
-from ._proto import FieldType, RequestKind, ResponseKind
+from ._proto import FieldType, RequestKind, ResponseKind, SetCondition
 from .errors import ErrorCode
 
 _FRAME_HEADER_FMT = "<II"
@@ -45,10 +45,20 @@ class JFPCodec(Codec):
         fields = [(FieldType.payload, payload)] if payload else []
         return _pack_request(RequestKind.ping, fields)
 
-    def pack_set(self, key: bytes, value: bytes) -> bytes:
+    def pack_set(
+        self,
+        key: bytes,
+        value: bytes,
+        condition: SetCondition = SetCondition.none,
+    ) -> bytes:
+        fields = [(FieldType.key, key), (FieldType.value, value)]
+        if condition != SetCondition.none:
+            fields.append(
+                (FieldType.set_condition, struct.pack("<B", condition))
+            )
         return _pack_request(
             RequestKind.set,
-            [(FieldType.key, key), (FieldType.value, value)],
+            fields,
         )
 
     def pack_get(self, key: bytes) -> bytes:
@@ -59,6 +69,21 @@ class JFPCodec(Codec):
 
     def pack_exists(self, key: bytes) -> bytes:
         return _pack_request(RequestKind.exists, [(FieldType.key, key)])
+
+    def pack_ttl(self, key: bytes) -> bytes:
+        return _pack_request(RequestKind.ttl, [(FieldType.key, key)])
+
+    def pack_persist(self, key: bytes) -> bytes:
+        return _pack_request(RequestKind.persist, [(FieldType.key, key)])
+
+    def pack_expire(self, key: bytes, seconds: int) -> bytes:
+        return _pack_request(
+            RequestKind.expire,
+            [
+                (FieldType.key, key),
+                (FieldType.seconds, struct.pack("<Q", seconds)),
+            ],
+        )
 
     def unpack_response(self, data: bytes) -> bytes:
         from .client import JstineError

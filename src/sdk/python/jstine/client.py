@@ -10,6 +10,7 @@ from ._proto import (
     HEADER_SIZE,
     Protocol,
     RequestKind,
+    SetCondition,
     pack_handshake,
     unpack_handshake,
 )
@@ -77,12 +78,39 @@ class Client:
         key: bytes | bytearray | memoryview | str | int | float,
         value: bytes | bytearray | memoryview | str | int | float,
     ) -> bool:
+        return self._set(key, value, SetCondition.none)
+
+    def setnx(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+    ) -> bool:
+        return self._set(key, value, SetCondition.nx)
+
+    def setxx(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+    ) -> bool:
+        return self._set(key, value, SetCondition.xx)
+
+    def _set(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        value: bytes | bytearray | memoryview | str | int | float,
+        condition: SetCondition,
+    ) -> bool:
+        fields = [
+            (FieldType.key, coerce_bytes(key)),
+            (FieldType.value, coerce_bytes(value)),
+        ]
+        if condition != SetCondition.none:
+            fields.append(
+                (FieldType.set_condition, struct.pack("<B", condition))
+            )
         self._request(
             RequestKind.set,
-            [
-                (FieldType.key, coerce_bytes(key)),
-                (FieldType.value, coerce_bytes(value)),
-            ],
+            fields,
         )
         return True
 
@@ -129,6 +157,42 @@ class Client:
                 return False
             raise
 
+    def ttl(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> int | None:
+        payload = self._request(
+            RequestKind.ttl, [(FieldType.key, coerce_bytes(key))]
+        )
+        if not payload:
+            return None
+        if len(payload) != 8:
+            raise ValueError(
+                f"Invalid TTL response size: expected 8, got {len(payload)}"
+            )
+        return struct.unpack("<Q", payload)[0]
+
+    def persist(
+        self, key: bytes | bytearray | memoryview | str | int | float
+    ) -> bool:
+        self._request(
+            RequestKind.persist, [(FieldType.key, coerce_bytes(key))]
+        )
+        return True
+
+    def expire(
+        self,
+        key: bytes | bytearray | memoryview | str | int | float,
+        seconds: int,
+    ) -> bool:
+        self._request(
+            RequestKind.expire,
+            [
+                (FieldType.key, coerce_bytes(key)),
+                (FieldType.seconds, _pack_u64(seconds, "seconds")),
+            ],
+        )
+        return True
+
     def _handshake(self) -> None:
         self._send(pack_handshake(self._protocol))
         self._protocol = unpack_handshake(self._recv_exact(HEADER_SIZE))
@@ -161,3 +225,11 @@ class Client:
         payload_size, _ = struct.unpack(_FRAME_HEADER_FMT, header)
         rest = self._recv_exact(payload_size - 4) if payload_size > 4 else b""
         return self._codec.unpack_response(header + rest)
+
+
+def _pack_u64(value: int, name: str) -> bytes:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise TypeError(f"{name} must be an int")
+    if not 0 <= value <= 0xFFFFFFFFFFFFFFFF:
+        raise ValueError(f"{name} must be between 0 and 2^64 - 1")
+    return struct.pack("<Q", value)

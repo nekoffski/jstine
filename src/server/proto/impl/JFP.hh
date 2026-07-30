@@ -23,6 +23,8 @@ namespace jstine {
 //   3 = value         Value used by set
 //   4 = error_code    Error response code, little-endian u32
 //   5 = error_message Error response message, utf-8 bytes
+//   6 = seconds       Expiration duration, little-endian u64
+//   7 = set_condition SET existence condition, u8
 //
 // The decoder accepts incremental feeds:
 // - `feed()` appends raw bytes to an internal buffer
@@ -36,6 +38,8 @@ enum class JFPFieldType : u8 {
     value = 3,
     errorCode = 4,
     errorMessage = 5,
+    seconds = 6,
+    setCondition = 7,
 };
 
 class JFPRequestDecoder : public RequestDecoder {

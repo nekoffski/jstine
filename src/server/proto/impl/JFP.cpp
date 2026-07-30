@@ -22,6 +22,12 @@ u32 readU32(const Byte* p) {
     return v;
 }
 
+u64 readU64(const Byte* p) {
+    u64 v;
+    std::memcpy(&v, p, sizeof(v));
+    return v;
+}
+
 void writeU32(Byte* p, u32 v) { std::memcpy(p, &v, sizeof(v)); }
 
 void appendField(Bytes& out, JFPFieldType type, CBytesView data) {
@@ -112,7 +118,29 @@ Result<Request> buildRequest(u32 kindRaw, const FieldMap& fields) {
             if (not v) {
                 return std::unexpected(v.error());
             }
-            return Request{RequestKind::set, SetRequestBody{**k, **v}};
+
+            SetCondition condition = SetCondition::none;
+            if (const auto* raw = field(fields, JFPFieldType::setCondition)) {
+                if (raw->size() != sizeof(u8)) {
+                    return Error::unexpected(
+                        ErrorCode::badInput,
+                        "set: condition must be exactly 1 byte"
+                    );
+                }
+                condition = static_cast<SetCondition>((*raw)[0]);
+                if (condition != SetCondition::none &&
+                    condition != SetCondition::nx &&
+                    condition != SetCondition::xx) {
+                    return Error::unexpected(
+                        ErrorCode::badInput, "set: unknown condition: {}",
+                        (*raw)[0]
+                    );
+                }
+            }
+
+            return Request{
+                RequestKind::set, SetRequestBody{**k, **v, condition}
+            };
         }
         case RequestKind::del: {
             auto k = req(JFPFieldType::key, "del: missing key");
@@ -127,6 +155,41 @@ Result<Request> buildRequest(u32 kindRaw, const FieldMap& fields) {
                 return std::unexpected(k.error());
             }
             return Request{RequestKind::exists, ExistsRequestBody{**k}};
+        }
+        case RequestKind::ttl: {
+            auto k = req(JFPFieldType::key, "ttl: missing key");
+            if (not k) {
+                return std::unexpected(k.error());
+            }
+            return Request{RequestKind::ttl, TtlRequestBody{**k}};
+        }
+        case RequestKind::persist: {
+            auto k = req(JFPFieldType::key, "persist: missing key");
+            if (not k) {
+                return std::unexpected(k.error());
+            }
+            return Request{RequestKind::persist, PersistRequestBody{**k}};
+        }
+        case RequestKind::expire: {
+            auto k = req(JFPFieldType::key, "expire: missing key");
+            if (not k) {
+                return std::unexpected(k.error());
+            }
+            auto seconds =
+                req(JFPFieldType::seconds, "expire: missing seconds");
+            if (not seconds) {
+                return std::unexpected(seconds.error());
+            }
+            if ((*seconds)->size() != sizeof(u64)) {
+                return Error::unexpected(
+                    ErrorCode::badInput,
+                    "expire: seconds must be exactly 8 bytes"
+                );
+            }
+            return Request{
+                RequestKind::expire,
+                ExpireRequestBody{**k, readU64((*seconds)->data())}
+            };
         }
         default:
             return Error::unexpected(

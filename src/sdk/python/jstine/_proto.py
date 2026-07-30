@@ -20,11 +20,20 @@ class RequestKind(IntEnum):
     get = 3
     delete = 4
     exists = 5
+    ttl = 6
+    persist = 7
+    expire = 8
 
 
 class ResponseKind(IntEnum):
     ok = 0
     error = 1
+
+
+class SetCondition(IntEnum):
+    none = 0
+    nx = 1
+    xx = 2
 
 
 # Field type identifiers — must match JFPFieldType in JFP.hh
@@ -34,6 +43,8 @@ class FieldType(IntEnum):
     value = 3  # Set value
     error_code = 4  # ErrorResponse code (u32 LE)
     error_message = 5  # ErrorResponse message (utf-8 bytes)
+    seconds = 6  # Expiration duration (u64 LE)
+    set_condition = 7  # SetCondition (u8)
 
 
 def pack_handshake(protocol: Protocol) -> bytes:

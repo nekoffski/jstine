@@ -14,11 +14,20 @@ enum class RequestKind {
     get = 3,
     del = 4,
     exists = 5,
+    ttl = 6,
+    persist = 7,
+    expire = 8,
 };
 
 enum class ResponseKind {
     ok = 0,
     error = 1,
+};
+
+enum class SetCondition : u8 {
+    none = 0,
+    nx = 1,
+    xx = 2,
 };
 
 struct PingRequestBody {
@@ -28,6 +37,7 @@ struct PingRequestBody {
 struct SetRequestBody {
     Bytes key;
     Bytes value;
+    SetCondition condition = SetCondition::none;
 };
 
 struct GetRequestBody {
@@ -42,9 +52,22 @@ struct ExistsRequestBody {
     Bytes key;
 };
 
+struct TtlRequestBody {
+    Bytes key;
+};
+
+struct PersistRequestBody {
+    Bytes key;
+};
+
+struct ExpireRequestBody {
+    Bytes key;
+    u64 seconds;
+};
+
 using RequestBody = std::variant<
     PingRequestBody, SetRequestBody, GetRequestBody, DelRequestBody,
-    ExistsRequestBody>;
+    ExistsRequestBody, TtlRequestBody, PersistRequestBody, ExpireRequestBody>;
 
 struct OkResponseBody {
     Bytes payload;
