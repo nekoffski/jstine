@@ -61,7 +61,7 @@ asio::awaitable<Result<bool>> AsioStorageProxy::exists(
 
 asio::awaitable<Result<void>> AsioStorageProxy::remove(CBytesView keyBytes) {
     RemoveCommand command{};
-    command.keyBytesList = {keyBytes};
+    command.keyBytes = keyBytes;
 
     co_return co_await submit<Result<void>>(m_commandQueue, std::move(command));
 }
@@ -85,6 +85,15 @@ asio::awaitable<Result<Bytes>> AsioStorageProxy::get(
     co_return co_await submit<Result<Bytes>>(
         m_commandQueue, std::move(command)
     );
+}
+
+void AsioStorageProxy::schedule(TransactionCommand&& command) {
+    Command queuedCommand{std::move(command)};
+    if (not m_commandQueue.push(std::move(queuedCommand))) {
+        failBecauseStorageIsUnavailable(
+            std::get<TransactionCommand>(queuedCommand)
+        );
+    }
 }
 
 }  // namespace jstine

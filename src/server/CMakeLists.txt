@@ -40,6 +40,7 @@ add_library(jstined_lib STATIC
     "storage/kv/ValueWrapper.cpp"
     "storage/kv/EmptyValue.cpp"
     "storage/api/StorageProxy.cpp"
+    "storage/api/StorageTransaction.cpp"
     "storage/api/StorageExecutor.cpp"
     "storage/api/StorageCommandQueue.cpp"
 )

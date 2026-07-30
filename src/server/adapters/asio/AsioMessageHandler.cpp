@@ -43,16 +43,21 @@ asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(
 asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(
     const DelRequestBody& body
 ) {
-    if (auto exists = co_await m_storageProxy.exists(body.key); not exists) {
-        co_return Response::error(exists.error());
-    } else if (not *exists) {
-        co_return Response::error(ErrorCode::notFound, "Key does not exist");
+    auto response = co_await m_storageProxy.atomically(
+        [&](StorageTransaction& trx) -> Response {
+            if (not trx.exists(body.key)) {
+                return Response::error(
+                    ErrorCode::notFound, "Key does not exist"
+                );
+            }
+            trx.remove(body.key);
+            return Response::ok();
+        }
+    );
+    if (not response) {
+        co_return Response::error(response.error());
     }
-
-    if (auto result = co_await m_storageProxy.remove(body.key); not result) {
-        co_return Response::error(result.error());
-    }
-    co_return Response::ok();
+    co_return std::move(*response);
 }
 
 asio::awaitable<Response> AsioMessageHandler::Dispatcher::operator()(

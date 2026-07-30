@@ -38,12 +38,16 @@ void StorageExecutor::execute(SetCommand&& command) {
 }
 
 void StorageExecutor::execute(RemoveCommand&& command) {
-    m_database.remove(command.keyBytesList);
+    m_database.remove(command.keyBytes);
     command.callback({});
 }
 
 void StorageExecutor::execute(ExistsCommand&& command) {
     command.callback(m_database.exists(command.keyBytes));
+}
+
+void StorageExecutor::execute(TransactionCommand&& command) {
+    command.callback(std::ref(m_database));
 }
 
 }  // namespace jstine

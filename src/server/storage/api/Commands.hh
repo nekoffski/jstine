@@ -5,6 +5,7 @@
 
 #include "core/Error.hh"
 #include "core/Functional.hh"
+#include "storage/Database.hh"
 #include "storage/kv/Key.hh"
 #include "storage/kv/Value.hh"
 
@@ -27,14 +28,16 @@ struct SetCommand : CommandBase<void> {
 };
 
 struct RemoveCommand : CommandBase<void> {
-    std::vector<CBytesView> keyBytesList;
+    CBytesView keyBytes;
 };
 
 struct ExistsCommand : CommandBase<bool> {
     CBytesView keyBytes;
 };
 
-using Command =
-    std::variant<GetCommand, SetCommand, RemoveCommand, ExistsCommand>;
+struct TransactionCommand : CommandBase<std::reference_wrapper<Database>> {};
+
+using Command = std::variant<
+    GetCommand, SetCommand, RemoveCommand, ExistsCommand, TransactionCommand>;
 
 }  // namespace jstine

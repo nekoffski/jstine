@@ -20,10 +20,9 @@ bool Database::exists(CBytesView keyBytes) const {
     return m_keyspace.exists(key);
 }
 
-bool Database::remove(const std::vector<CBytesView>& keyBytesList) {
-    for (const auto& keyBytes : keyBytesList) {
-        m_keyspace.remove(Key{keyBytes});
-    }
+bool Database::remove(CBytesView keyBytes) {
+    Key key{keyBytes};
+    m_keyspace.remove(key);
     return true;
 }
 

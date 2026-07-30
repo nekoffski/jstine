@@ -20,6 +20,7 @@ class StorageExecutor : public Thread {
     void execute(SetCommand&& command);
     void execute(RemoveCommand&& command);
     void execute(ExistsCommand&& command);
+    void execute(TransactionCommand&& command);
 
     Database& m_database;
     ThreadSafeQueue<Command>& m_commandQueue;

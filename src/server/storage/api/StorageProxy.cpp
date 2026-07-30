@@ -46,9 +46,9 @@ Result<bool> StorageProxy::exists(CBytesView keyBytes) const {
     return submit<Result<bool>>(m_commandQueue, std::move(command));
 }
 
-Result<void> StorageProxy::remove(const std::vector<CBytesView>& keyBytesList) {
+Result<void> StorageProxy::remove(CBytesView keyBytes) {
     RemoveCommand command{};
-    command.keyBytesList = keyBytesList;
+    command.keyBytes = keyBytes;
 
     return submit<Result<void>>(m_commandQueue, std::move(command));
 }
@@ -66,6 +66,15 @@ Result<Bytes> StorageProxy::get(CBytesView keyBytes) const {
     command.keyBytes = keyBytes;
 
     return submit<Result<Bytes>>(m_commandQueue, std::move(command));
+}
+
+void StorageProxy::schedule(TransactionCommand&& command) {
+    Command queuedCommand{std::move(command)};
+    if (not m_commandQueue.push(std::move(queuedCommand))) {
+        failBecauseStorageIsUnavailable(
+            std::get<TransactionCommand>(queuedCommand)
+        );
+    }
 }
 
 }  // namespace jstine

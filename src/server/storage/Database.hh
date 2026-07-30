@@ -20,7 +20,7 @@ class Database : public NonCopyable, public NonMovable {
     );
 
     bool exists(CBytesView keyBytes) const;
-    bool remove(const std::vector<CBytesView>& keyBytesList);
+    bool remove(CBytesView keyBytes);
     Opt<Error> set(CBytesView keyBytes, CBytesView valueBytes);
     Result<CBytesView> get(CBytesView keyBytes) const;
 

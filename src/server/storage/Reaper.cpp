@@ -44,7 +44,7 @@ void Reaper::run() {
 
 void Reaper::reap() {
     const auto reapLimit = m_config.storage().reapLimitPerRun;
-    std::vector<CBytesView> keysToReap;
+    std::vector<Key> keysToReap;
     keysToReap.reserve(reapLimit);
 
     auto now = Clock::now();
@@ -55,7 +55,7 @@ void Reaper::reap() {
                 return false;
             }
             if (deadline <= now) {
-                keysToReap.push_back(key.bytes());
+                keysToReap.push_back(key);
             }
             return true;
         }
@@ -63,7 +63,14 @@ void Reaper::reap() {
 
     if (auto size = keysToReap.size(); size > 0) {
         log::info("Reaper found {} keys to remove", size);
-        m_storageProxy.remove(keysToReap);
+
+        m_storageProxy.atomically([&](StorageTransaction& trx) {
+            for (const auto& key : keysToReap) {
+                if (trx.exists(key.bytes())) {
+                    trx.remove(key.bytes());
+                }
+            }
+        });
     }
 }
 
