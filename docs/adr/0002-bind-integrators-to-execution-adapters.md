@@ -1,0 +1,3 @@
+# Bind integrators to execution adapters
+
+The Renderer will select a backend-specific Integrator adapter from the configured algorithm and execution implementation, such as a scalar, SIMD, or future GPU path integrator. We will not begin with a universal low-level Render Backend interface: scalar `Li()`, SIMD packet or stream processing, and GPU compute pipelines organize work differently, so forcing them through one execution surface would either leak scheduling details or create a lowest-common-denominator design; reusable execution modules will be extracted only after multiple concrete adapters reveal a real seam.

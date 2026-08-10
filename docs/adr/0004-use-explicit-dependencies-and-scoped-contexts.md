@@ -1,0 +1,3 @@
+# Use explicit dependencies and scoped contexts
+
+The workbench will have no mutable singletons or hidden global services: the application composition root owns long-lived facilities, constructors receive narrow dependencies, and each Render Session owns its scene data, scheduling state, allocators, cancellation, metrics, and accumulation. A scoped Render Context may carry genuinely cross-cutting per-session facilities through orchestration code, but it will not provide generic service lookup and hot kernels will receive only the typed data they need; this makes lifetime, concurrency, and test isolation visible even when explicit parameter passing is more verbose.

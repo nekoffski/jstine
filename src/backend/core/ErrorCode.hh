@@ -1,0 +1,22 @@
+#pragma once
+#include "core/Core.hh"
+namespace jstine {
+
+enum class ErrorCode : u32 {
+    noError = 0,
+    badInput = 1,
+    badConfig = 2,
+    fileSystemError = 3,
+    invalidArgument = 4,
+    osError = 5,
+    handshakeFailure = 6,
+    requestNotReady = 7,
+    eof = 8,
+    connectionFailure = 9,
+    notImplementedYet = 10,
+    notFound = 11,
+    allocatorFailure = 12,
+    storageUnavailable = 13,
+};
+
+}  // namespace jstine

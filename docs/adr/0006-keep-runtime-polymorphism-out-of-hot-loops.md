@@ -1,0 +1,3 @@
+# Keep runtime polymorphism out of hot loops
+
+Runtime-polymorphic interfaces will be limited to coarse configured seams such as Integrator adapters and Render Sessions, while math and scene descriptions remain value-oriented, closed scene alternatives may use tagged values, and templates or concepts remain contained within performance modules. Geometry intersection, BSDF evaluation, sampling, and traversal will not depend on inheritance-based entity models or per-item virtual dispatch, accepting more explicit closed-set dispatch where necessary so scalar, SIMD, and future device implementations can inline, specialize, and reorganize data.
