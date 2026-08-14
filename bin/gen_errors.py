@@ -5,7 +5,7 @@ import sys
 
 
 def parse_errors(input_file: str) -> list[tuple[str, str]]:
-    entries = []
+    entries: list[tuple[str, str]] = []
     with open(input_file) as f:
         for line in f:
             line = line.strip()
@@ -19,7 +19,9 @@ def parse_errors(input_file: str) -> list[tuple[str, str]]:
 def generate_cpp(entries: list[tuple[str, str]]) -> str:
     lines = [
         "#pragma once",
-        "#include \"core/Core.hh\"",
+        "",
+        '#include "Core.hh"',
+        "",
         "namespace jstine {",
         "",
         "enum class ErrorCode : u32 {",
@@ -53,12 +55,16 @@ def generate_python(entries: list[tuple[str, str]]) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate ErrorCode enum from errors.in")
+        description="Generate ErrorCode enum from errors.in"
+    )
     parser.add_argument("input", help="Path to errors.in file")
     parser.add_argument("output", help="Path to output file")
     parser.add_argument(
-        "--lang", choices=["cpp", "python"], default="cpp",
-        help="Output language (default: cpp)")
+        "--lang",
+        choices=["cpp", "python"],
+        default="cpp",
+        help="Output language (default: cpp)",
+    )
     args = parser.parse_args()
 
     entries = parse_errors(args.input)

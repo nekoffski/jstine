@@ -30,4 +30,4 @@ clean:
 	rm -rf build CMakeUserPresets.json
 
 gen_errors:
-	./scripts/gen_errors.py ./conf/errors.in ./src/server/core/ErrorCode.hh
+	./bin/gen_errors.py ./conf/errors.in ./src/backend/jstine/core/ErrorCode.hh

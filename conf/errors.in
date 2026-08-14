@@ -1,2 +1,4 @@
 noError = 0
 badConfig = 1
+fileSystemError = 2
+invalidArgument = 3

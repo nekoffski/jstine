@@ -57,7 +57,7 @@ template <typename... Args>
 
 struct LoggerOptions {
     bool enableColors{false};
-    std::string formatPattern{"%^[%d-%m-%Y %T] [Th: %t] %-7l [jstined]: %v %$"};
+    std::string formatPattern{"%^[%d-%m-%Y %T] [Th: %t] %-7l [jstine]: %v %$"};
 };
 
 void init(const LoggerOptions& options = LoggerOptions{});

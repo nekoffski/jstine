@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Config.hh"
+#include "Config.hh"
 
 namespace jstine {
 
