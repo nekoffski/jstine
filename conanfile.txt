@@ -5,6 +5,7 @@ tomlplusplus/3.4.0
 stduuid/1.2.3
 cli11/2.4.2
 gtest/1.15.0
+stb/cci.20240531
 
 [generators]
 CMakeDeps

@@ -14,6 +14,13 @@ add_library(jstine_backend STATIC
     "jstine/render/RenderOrchestrator.cpp"
     "jstine/render/RenderRequest.cpp"
     "jstine/render/RenderSession.cpp"
+    # -- math
+    "jstine/math/Bounds.cpp"
+    # -- imaging
+    "jstine/imaging/Film.cpp"
+    # -- adapters
+    "jstine/adapters/PngFilmSnapshotWriter.cpp"
+    "jstine/adapters/Stb.cpp"
 )
 
 target_include_directories(jstine_backend
@@ -28,6 +35,7 @@ target_link_libraries(jstine_backend
         stduuid::stduuid
         CLI11::CLI11
         tomlplusplus::tomlplusplus
+        stb::stb
 )
 
 if (JSTINE_ENABLE_PROFILING)

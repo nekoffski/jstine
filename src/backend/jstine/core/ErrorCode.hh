@@ -9,6 +9,7 @@ enum class ErrorCode : u32 {
     badConfig = 1,
     fileSystemError = 2,
     invalidArgument = 3,
+    imageWriteError = 4,
 };
 
 }  // namespace jstine

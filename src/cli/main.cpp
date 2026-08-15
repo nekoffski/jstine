@@ -1,3 +1,4 @@
+#include "jstine/adapters/PngFilmSnapshotWriter.hh"
 #include "jstine/core/Config.hh"
 #include "jstine/core/Log.hh"
 #include "jstine/core/TomlConfigReader.hh"
@@ -13,10 +14,9 @@ int main(int argc, char** argv) {
 
     RenderRequest request;
     auto session = unwrap(orchestrator.startSession(request));
+    auto snapshot = unwrap(session.snapshot());
 
-    while (not session.finished()) {
-        break;
-    }
+    log::expect(PngFilmSnapshotWriter{}.write(snapshot, Path("output.png")));
 
     return 0;
 }

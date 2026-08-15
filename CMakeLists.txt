@@ -12,6 +12,7 @@ find_package(tomlplusplus CONFIG REQUIRED)
 find_package(stduuid REQUIRED)
 find_package(CLI11)
 find_package(GTest REQUIRED)
+find_package(stb REQUIRED)
 
 add_subdirectory(src)
 
