@@ -3,6 +3,8 @@
 #include "jstine/core/Log.hh"
 #include "jstine/core/TomlConfigReader.hh"
 #include "jstine/core/Unwrap.hh"
+#include "jstine/math/Ray.hh"
+#include "jstine/math/Vector.hh"
 #include "jstine/render/RenderOrchestrator.hh"
 
 using namespace jstine;
