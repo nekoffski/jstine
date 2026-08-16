@@ -44,13 +44,13 @@ class File {
 
     const Path& path() const;
 
-    Opt<Error> append(const Str& content);
-    Opt<Error> write(const Str& content);
+    Result<void> append(const Str& content);
+    Result<void> write(const Str& content);
     Result<Str> read() const;
     Result<std::vector<Str>> readLines() const;
     Result<std::vector<u32>> readBinary() const;
 
-    Opt<Error> remove();
+    Result<void> remove();
 
    private:
     Path m_path;
@@ -65,10 +65,10 @@ class Directory {
     std::vector<Path> listFiles() const;
     std::vector<Path> listDirectories() const;
 
-    Opt<Error> create();
-    Opt<Error> createSubdirectory(const Path& name);
-    Opt<Error> touch(const Path& name);
-    Opt<Error> remove();
+    Result<void> create();
+    Result<void> createSubdirectory(const Path& name);
+    Result<void> touch(const Path& name);
+    Result<void> remove();
 
    private:
     Path m_path;

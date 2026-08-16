@@ -17,8 +17,10 @@ add_library(jstine_backend STATIC
     "jstine/render/integrators/path/ScalarPathIntegrator.cpp"
     # -- math
     "jstine/math/Bounds.cpp"
+    "jstine/math/Point.cpp"
     # -- imaging
     "jstine/imaging/Film.cpp"
+    "jstine/imaging/RasterDomain.cpp"
     # -- adapters
     "jstine/adapters/PngFilmSnapshotWriter.cpp"
     "jstine/adapters/Stb.cpp"

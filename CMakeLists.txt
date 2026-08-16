@@ -14,7 +14,6 @@ find_package(CLI11)
 find_package(GTest REQUIRED)
 find_package(stb REQUIRED)
 
-add_subdirectory(src)
+include(CTest)
 
-# enable_testing()
-# add_subdirectory(tests/unit)
+add_subdirectory(src)

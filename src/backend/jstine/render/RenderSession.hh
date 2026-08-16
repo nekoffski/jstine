@@ -3,6 +3,8 @@
 #include <atomic>
 
 #include "Integrator.hh"
+#include "RenderContext.hh"
+#include "RenderRequest.hh"
 #include "jstine/core/Concepts.hh"
 #include "jstine/core/Core.hh"
 #include "jstine/imaging/Film.hh"
@@ -14,12 +16,15 @@ namespace details {
 
 class IntegratorThread : public Thread {
    public:
-    explicit IntegratorThread(const Str& ident, Integrator& integrator);
+    explicit IntegratorThread(
+        const Str& ident, Integrator& integrator, Film& film
+    );
 
    private:
-    Opt<Error> run() override;
+    Result<void> run() override;
 
     Integrator& m_integrator;
+    Film& m_film;
 };
 
 }  // namespace details
@@ -34,14 +39,17 @@ class RenderSession : public NonCopyable {
     RenderSession(RenderSession&& oth) = default;
 
     bool finished() const;
-    Opt<Error> wait();
+    Result<void> wait();
 
-    Result<FilmSnapshot> snapshot();
+    FilmSnapshot snapshot();
 
    private:
-    explicit RenderSession(std::unique_ptr<Integrator> integrator);
+    explicit RenderSession(
+        std::unique_ptr<Integrator> integrator, const RenderRequest& req
+    );
 
     std::unique_ptr<Integrator> m_integrator;
+    std::unique_ptr<Film> m_film;
     std::unique_ptr<details::IntegratorThread> m_runner;
 };
 

@@ -1,38 +1,51 @@
 #pragma once
 
+#include <mutex>
+
 #include "Color.hh"
 #include "Plane.hh"
 #include "RasterDomain.hh"
 #include "jstine/core/Concepts.hh"
 #include "jstine/core/Error.hh"
-#include "jstine/core/FileSystem.hh"
 
 namespace jstine {
 
-struct FilmSpec {};
+struct FilmSpec {
+    RasterDomain domain;
+    RgbColorSpace colorSpace;
+};
 
 class Film;
 
-class FilmSnapshot final {
+class FilmSnapshot final : public NonCopyable {
     friend class Film;
 
    public:
-    struct Writer : public NonCopyable, public NonMovable {
-        virtual ~Writer() = default;
-        virtual Opt<Error> write(
-            const FilmSnapshot& snapshot, const Path& path
-        ) = 0;
-    };
-
     const Plane<BeautyTag>& beauty() const;
+    const RasterDomain& rasterDomain() const;
+    const RgbColorSpace& colorSpace() const;
 
    private:
+    explicit FilmSnapshot(
+        const RasterDomain& domain, const RgbColorSpace& colorSpace,
+        Plane<BeautyTag> beauty
+    );
+
+    RasterDomain m_domain;
+    RgbColorSpace m_colorSpace;
     Plane<BeautyTag> m_beauty;
 };
 
 class Film final : public NonCopyable {
    public:
-    Result<FilmSnapshot> snapshot() {}
+    explicit Film(const FilmSpec& spec);
+
+    FilmSnapshot snapshot() const;
+
+   private:
+    FilmSpec m_spec;
+    Image<LinearRgb> m_image;
+    mutable std::mutex m_imageMutex;
 };
 
 }  // namespace jstine

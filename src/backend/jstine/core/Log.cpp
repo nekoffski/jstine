@@ -33,15 +33,6 @@ Str levelToString(Level level) {
     return "unknown";
 }
 
-void expect(const Opt<Error>& e) {
-    if (e.has_value()) [[unlikely]] {
-        log::panic(
-            "Unexpected error ({}): {}", fmt::underlying(e->code()),
-            e->message()
-        );
-    }
-}
-
 void init(const LoggerOptions& options) {
     auto colorSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 

@@ -1,3 +1,6 @@
+*.png
+
+
 # Build
 build/
 cmake-build-*/

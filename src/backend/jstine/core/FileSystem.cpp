@@ -38,28 +38,28 @@ File::File(const Path& path) : m_path(path) {}
 
 const Path& File::path() const { return m_path; }
 
-Opt<Error> File::append(const Str& content) {
+Result<void> File::append(const Str& content) {
     std::ofstream file(m_path.str(), std::ios::app);
     if (not file.is_open()) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError, "Failed to open file for appending: {}",
             m_path.str()
-        };
+        );
     }
     file << content;
-    return Error::empty();
+    return {};
 }
 
-Opt<Error> File::write(const Str& content) {
+Result<void> File::write(const Str& content) {
     std::ofstream file(m_path.str(), std::ios::trunc);
     if (not file.is_open()) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError, "Failed to open file for writing: {}",
             m_path.str()
-        };
+        );
     }
     file << content;
-    return Error::empty();
+    return {};
 }
 
 Result<Str> File::read() const {
@@ -112,16 +112,16 @@ Result<std::vector<u32>> File::readBinary() const {
     return buffer;
 }
 
-Opt<Error> File::remove() {
+Result<void> File::remove() {
     std::error_code ec;
     fs::remove(m_path.str(), ec);
     if (ec) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError, "Failed to remove file '{}'",
             m_path.str()
-        };
+        );
     }
-    return Error::empty();
+    return {};
 }
 
 Directory::Directory(const Path& path) : m_path(path) {}
@@ -148,55 +148,55 @@ std::vector<Path> Directory::listDirectories() const {
     return directories;
 }
 
-Opt<Error> Directory::create() {
+Result<void> Directory::create() {
     std::error_code ec;
     fs::create_directories(m_path.str(), ec);
     if (ec) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError, "Failed to create directory '{}'",
             m_path.str()
-        };
+        );
     }
-    return Error::empty();
+    return {};
 }
 
-Opt<Error> Directory::remove() {
+Result<void> Directory::remove() {
     std::error_code ec;
     fs::remove_all(m_path.str(), ec);
     if (ec) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError, "Failed to remove directory '{}'",
             m_path.str()
-        };
+        );
     }
-    return Error::empty();
+    return {};
 }
 
-Opt<Error> Directory::createSubdirectory(const Path& name) {
+Result<void> Directory::createSubdirectory(const Path& name) {
     const auto subdirPath = Path::join(m_path, name);
     std::error_code ec;
     fs::create_directories(subdirPath.str(), ec);
     if (ec) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError,
             "Failed to create subdirectory '{}' in '{}'", name.str(),
             m_path.str()
-        };
+        );
     }
-    return Error::empty();
+    return {};
 }
 
-Opt<Error> Directory::touch(const Path& name) {
+Result<void> Directory::touch(const Path& name) {
     const auto filePath = Path::join(m_path, name);
     std::ofstream file(filePath.str(), std::ios::app);
     if (not file.is_open()) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::fileSystemError,
             "Failed to create or open file '{}' in '{}'", name.str(),
             m_path.str()
-        };
+        );
     }
-    return Error::empty();
+    return {};
 }
 
 }  // namespace jstine

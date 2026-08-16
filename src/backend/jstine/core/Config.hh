@@ -15,7 +15,7 @@ class ConfigFileReader : public NonCopyable, public NonMovable {
    public:
     virtual ~ConfigFileReader() = default;
 
-    virtual Opt<Error> read(Config& config, const Path& path) const = 0;
+    virtual Result<void> read(Config& config, const Path& path) const = 0;
 };
 
 enum class ExecutionBackend {

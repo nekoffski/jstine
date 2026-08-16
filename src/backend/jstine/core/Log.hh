@@ -124,13 +124,16 @@ void expect(bool condition, details::FormatWithLocation fmt, Args&&... args) {
     }
 }
 
-void expect(const Opt<Error>& e);
-
 template <typename T>
-void expect(const Result<T>& r) {
+void expect(
+    const Result<T>& r,
+    const std::source_location& location = std::source_location::current()
+) {
     if (not r) [[unlikely]] {
         log::panic(
-            "Unexpected error: Error code: {}, message: {}",
+            details::FormatWithLocation{
+                "Unexpected error: Error code: {}, message: {}", location
+            },
             fmt::underlying(r.error().code()), r.error().message()
         );
     }

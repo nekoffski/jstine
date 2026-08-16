@@ -77,7 +77,7 @@ class Reader : public NonCopyable, public NonMovable {
     do {                                              \
         auto result = reader.read<type>(stanza, key); \
         if (not result) {                             \
-            return result.error();                    \
+            return Error::unexpected(result.error()); \
         }                                             \
         lhs = result.value();                         \
     } while (0)
@@ -86,12 +86,12 @@ class Reader : public NonCopyable, public NonMovable {
     do {                                                \
         auto result = reader.read<type>(stanza, key);   \
         if (not result) {                               \
-            return result.error();                      \
+            return Error::unexpected(result.error());   \
         }                                               \
         lhs = transform(result.value());                \
     } while (0)
 
-Opt<Error> readFields(Config& c, const Reader& reader) {
+Result<void> readFields(Config& c, const Reader& reader) {
     READ_FIELD_T(c.log().level, "log", "level", Str, log::levelFromString);
     READ_FIELD(c.paths().output, "paths", "output", Str);
     READ_FIELD_T(
@@ -103,28 +103,28 @@ Opt<Error> readFields(Config& c, const Reader& reader) {
         integratorAlgorithmFromString
     );
 
-    return Error::empty();
+    return {};
 }
 
 }  // namespace
 
-Opt<Error> TomlConfigReader::read(Config& config, const Path& path) const {
+Result<void> TomlConfigReader::read(Config& config, const Path& path) const {
     try {
         auto tbl = toml::parse_file(path.str());
         Reader reader(tbl);
         return readFields(config, reader);
     } catch (const toml::parse_error& e) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::badConfig, "Failed to parse config file '{}': {}",
             path.str(), e.what()
-        };
+        );
     } catch (const std::exception& e) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::badConfig, "Failed to read config file '{}': {}",
             path.str(), e.what()
-        };
+        );
     }
-    return Error::empty();
+    return {};
 }
 
 }  // namespace jstine

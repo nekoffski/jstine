@@ -13,20 +13,24 @@ int main(int argc, char** argv) {
     auto cfg = unwrap(Config::load(argc, argv, TomlConfigReader{}));
     auto orchestrator = unwrap(RenderOrchestrator::create(cfg));
 
-    RenderRequest request;
+    RenderRequest request{
+        .film = {
+            .domain = RasterDomain{Extent2u{480, 480}},
+            .colorSpace = RgbColorSpace::srgb()
+        }
+    };
     auto session = unwrap(orchestrator.startSession(request));
 
-    if (auto err = session.wait(); err) {
+    if (auto res = session.wait(); not res) {
         log::error(
             "Error occurred while waiting for render session: {}",
-            err->message()
+            res.error().message()
         );
         return -1;
     }
 
-    // auto snapshot = unwrap(session.snapshot());
-
-    // log::expect(PngFilmSnapshotWriter{}.write(snapshot, cfg.paths().output));
+    auto snapshot = session.snapshot();
+    log::expect(PngFilmSnapshotWriter{}.write(snapshot, cfg.paths().output));
 
     return 0;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <thread>
 #include <vector>
 
@@ -11,12 +12,13 @@ namespace jstine {
 
 class Thread : public NonCopyable, public NonMovable {
    public:
-    enum class Status { running, failed, finished };
+    enum class Status { created, running, failed, finished };
 
     explicit Thread(const Str& ident);
     virtual ~Thread();
 
-    Opt<Error> join();
+    void start();
+    Result<void> join();
     Status status() const;
     virtual void cancel() {}
 
@@ -24,11 +26,11 @@ class Thread : public NonCopyable, public NonMovable {
     void sleepFor(std::chrono::milliseconds duration);
 
    private:
-    virtual Opt<Error> run() = 0;
+    virtual Result<void> run() = 0;
     void go();
 
     Str m_ident;
-    Status m_status{Status::running};
+    std::atomic<Status> m_status{Status::created};
     Opt<Error> m_error;
     std::thread m_thread;
 };

@@ -7,7 +7,9 @@ namespace jstine {
 
 class ScalarPathIntegrator : public Integrator {
    public:
-    explicit ScalarPathIntegrator(const Config::Renderer& config) {}
+    explicit ScalarPathIntegrator(const Config::Renderer& config);
+
+    Result<void> render(RenderContext& context) override;
 
    private:
 };

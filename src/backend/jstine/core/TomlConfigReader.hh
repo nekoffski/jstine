@@ -6,7 +6,7 @@ namespace jstine {
 
 class TomlConfigReader : public ConfigFileReader {
    public:
-    Opt<Error> read(Config& config, const Path& path) const override;
+    Result<void> read(Config& config, const Path& path) const override;
 };
 
 }  // namespace jstine

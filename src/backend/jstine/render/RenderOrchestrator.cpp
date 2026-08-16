@@ -7,13 +7,13 @@ namespace jstine {
 
 namespace {
 
-Opt<Error> validateRenderer(const Config::Renderer& cfg) {
+Result<void> validateRenderer(const Config::Renderer& cfg) {
     const auto os = detectOs();
 
     if (os == OS::darwin && cfg.backend == ExecutionBackend::cuda) {
-        return Error{
+        return Error::unexpected(
             ErrorCode::badConfig, "CUDA backend is not supported on macOS"
-        };
+        );
     }
     return {};
 }
@@ -23,8 +23,8 @@ Opt<Error> validateRenderer(const Config::Renderer& cfg) {
 RenderOrchestrator::RenderOrchestrator(const Config& cfg) : m_cfg(cfg) {}
 
 Result<RenderOrchestrator> RenderOrchestrator::create(const Config& cfg) {
-    if (auto err = validateRenderer(cfg.renderer())) {
-        return Error::unexpected(err.value());
+    if (auto res = validateRenderer(cfg.renderer()); not res) {
+        return Error::unexpected(res.error());
     }
     return RenderOrchestrator{cfg};
 }
@@ -36,7 +36,7 @@ Result<RenderSession> RenderOrchestrator::startSession(
     if (not integrator) {
         return Error::unexpected(integrator.error());
     }
-    return RenderSession(std::move(integrator.value()));
+    return RenderSession{std::move(integrator.value()), request};
 }
 
 Result<std::unique_ptr<Integrator>> RenderOrchestrator::createIntegrator(
@@ -48,4 +48,5 @@ Result<std::unique_ptr<Integrator>> RenderOrchestrator::createIntegrator(
     }
     return Error::unexpected(ErrorCode::badConfig, "Unsupported integrator");
 }
+
 }  // namespace jstine

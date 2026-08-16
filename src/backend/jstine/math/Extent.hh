@@ -5,8 +5,8 @@
 namespace jstine {
 
 struct Extent2u {
-    u32 x;
-    u32 y;
+    u32 w;
+    u32 h;
 };
 
 }  // namespace jstine

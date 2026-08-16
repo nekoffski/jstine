@@ -75,8 +75,8 @@ Result<Config> Config::load(
         return Error::unexpected(configPath.error());
     }
 
-    if (auto err = reader.read(cfg, configPath.value()); err) {
-        return Error::unexpected(err.value());
+    if (auto res = reader.read(cfg, configPath.value()); not res) {
+        return Error::unexpected(res.error());
     }
 
     cfg.overrideFields(argc, argv);
@@ -138,16 +138,18 @@ Str toString(IntegratorAlgorithm integrator) {
 }
 
 ExecutionBackend executionBackendFromString(const Str& str) {
-    auto it = executionBackendMap().find(str);
-    if (it != executionBackendMap().end()) {
-        return it->second;
+    const auto& map = executionBackendMap();
+    if (auto it = map.find(str); it != executionBackendMap().end()) {
+        if (it != executionBackendMap().end()) {
+            return it->second;
+        }
     }
     return ExecutionBackend::cpuScalar;
 }
 
 IntegratorAlgorithm integratorAlgorithmFromString(const Str& str) {
-    auto it = integratorAlgorithmMap().find(str);
-    if (it != integratorAlgorithmMap().end()) {
+    const auto& map = integratorAlgorithmMap();
+    if (auto it = map.find(str); it != integratorAlgorithmMap().end()) {
         return it->second;
     }
     return IntegratorAlgorithm::path;
