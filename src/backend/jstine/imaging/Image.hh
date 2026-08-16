@@ -44,6 +44,7 @@ class Image {
     }
 
     std::span<const Pixel> pixels() const noexcept { return m_pixels; }
+    std::span<Pixel> pixels() noexcept { return m_pixels; }
 
    private:
     Bounds2i m_bounds;

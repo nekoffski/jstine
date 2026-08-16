@@ -37,17 +37,20 @@ Result<void> PngFilmSnapshotWriter::write(
     i32 h = static_cast<i32>(extent.h);
     constexpr i32 ch = 3;
 
-    std::vector<u8> r;
-    r.resize(w * h * ch);
+    std::vector<u8> encoded;
+    encoded.resize(pixels.size() * ch);
 
     for (u32 i = 0; i < pixels.size(); ++i) {
         const auto& pixel = pixels[i];
-        r[i * ch + 0] = linearToSrgb8(pixel.r);
-        r[i * ch + 1] = linearToSrgb8(pixel.g);
-        r[i * ch + 2] = linearToSrgb8(pixel.b);
+        encoded[i * ch + 0] = linearToSrgb8(pixel.r);
+        encoded[i * ch + 1] = linearToSrgb8(pixel.g);
+        encoded[i * ch + 2] = linearToSrgb8(pixel.b);
     }
 
-    if (stbi_write_png(path.str().c_str(), w, h, ch, r.data(), w * ch) == 0) {
+    int output =
+        stbi_write_png(path.str().c_str(), w, h, ch, encoded.data(), w * ch);
+
+    if (output == 0) {
         return Error::unexpected(
             ErrorCode::imageWriteError, "Failed to write PNG image (stb)"
         );

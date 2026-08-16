@@ -58,7 +58,7 @@ void Thread::go() {
         return;
     }
 
-    m_status = Status::finished;
+    m_status = m_error ? Status::failed : Status::finished;
     log::info("{} - thread exiting", m_ident);
 }
 

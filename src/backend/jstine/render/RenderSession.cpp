@@ -11,7 +11,9 @@ RenderSession::RenderSession(
           std::make_unique<details::IntegratorThread>(
               "xyz", *m_integrator, *m_film
           )
-      ) {}
+      ) {
+    m_runner->start();
+}
 
 RenderSession::~RenderSession() {
     if (m_runner && not finished()) {

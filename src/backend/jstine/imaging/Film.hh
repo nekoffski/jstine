@@ -37,14 +37,22 @@ class FilmSnapshot final : public NonCopyable {
 };
 
 class Film final : public NonCopyable {
+    struct PixelAccumulator {
+        LinearRgb rgbSum;
+        f32 weightSum;
+    };
+
    public:
     explicit Film(const FilmSpec& spec);
 
+    void addRgbSample(const Point2i& pixel, const LinearRgb& rgb, f32 weight);
+
     FilmSnapshot snapshot() const;
+    const Bounds2i& pixelBounds() const;
 
    private:
     FilmSpec m_spec;
-    Image<LinearRgb> m_image;
+    Image<PixelAccumulator> m_image;
     mutable std::mutex m_imageMutex;
 };
 
