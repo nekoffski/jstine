@@ -15,6 +15,13 @@ class RenderOrchestrator : public NonCopyable {
     Result<RenderSession> startSession(const RenderRequest& request);
 
    private:
+    explicit RenderOrchestrator(const Config& cfg);
+
+    Result<std::unique_ptr<Integrator>> createIntegrator(
+        const Config::Renderer& cfg
+    );
+
+    const Config& m_cfg;
 };
 
 }  // namespace jstine

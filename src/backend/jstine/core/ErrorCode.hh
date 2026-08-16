@@ -10,6 +10,7 @@ enum class ErrorCode : u32 {
     fileSystemError = 2,
     invalidArgument = 3,
     imageWriteError = 4,
+    threadWorkerFailed = 5,
 };
 
 }  // namespace jstine

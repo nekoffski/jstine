@@ -23,7 +23,7 @@ struct NonMovable {
     NonMovable& operator=(NonMovable&&) = delete;
 };
 
-namespace detail {
+namespace details {
 template <typename C, typename Signature>
 struct CallableHelper;
 
@@ -36,7 +36,7 @@ struct CallableHelper<C, R(Args...)> {
 }  // namespace detail
 
 template <typename C, typename Signature>
-concept Callable = detail::CallableHelper<C, Signature>::value;
+concept Callable = details::CallableHelper<C, Signature>::value;
 
 template <typename T, typename... Ts>
 concept OneOf = requires() {

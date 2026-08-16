@@ -3,3 +3,4 @@ badConfig = 1
 fileSystemError = 2
 invalidArgument = 3
 imageWriteError = 4
+threadWorkerFailed = 5

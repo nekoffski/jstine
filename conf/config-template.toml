@@ -1,2 +1,9 @@
 [log]
 level = "info"
+
+[paths]
+output = "output.png"
+
+[renderer]
+integrator = "path"
+backend = "cpu_scalar"

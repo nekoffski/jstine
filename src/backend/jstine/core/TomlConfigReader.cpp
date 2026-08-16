@@ -93,6 +93,15 @@ class Reader : public NonCopyable, public NonMovable {
 
 Opt<Error> readFields(Config& c, const Reader& reader) {
     READ_FIELD_T(c.log().level, "log", "level", Str, log::levelFromString);
+    READ_FIELD(c.paths().output, "paths", "output", Str);
+    READ_FIELD_T(
+        c.renderer().backend, "renderer", "backend", Str,
+        executionBackendFromString
+    );
+    READ_FIELD_T(
+        c.renderer().integrator, "renderer", "integrator", Str,
+        integratorAlgorithmFromString
+    );
 
     return Error::empty();
 }

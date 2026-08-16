@@ -5,7 +5,7 @@ add_library(jstine_backend STATIC
     "jstine/core/Error.cpp"
     "jstine/core/FileSystem.cpp"
     "jstine/core/Log.cpp"
-    "jstine/core/Os.cpp"
+    "jstine/core/OS.cpp"
     "jstine/core/Profiler.cpp"
     "jstine/core/Random.cpp"
     "jstine/core/String.cpp"
@@ -14,6 +14,7 @@ add_library(jstine_backend STATIC
     "jstine/render/RenderOrchestrator.cpp"
     "jstine/render/RenderRequest.cpp"
     "jstine/render/RenderSession.cpp"
+    "jstine/render/integrators/path/ScalarPathIntegrator.cpp"
     # -- math
     "jstine/math/Bounds.cpp"
     # -- imaging
@@ -21,6 +22,8 @@ add_library(jstine_backend STATIC
     # -- adapters
     "jstine/adapters/PngFilmSnapshotWriter.cpp"
     "jstine/adapters/Stb.cpp"
+    # -- runtime
+    "jstine/runtime/Thread.cpp"
 )
 
 target_include_directories(jstine_backend

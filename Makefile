@@ -1,4 +1,4 @@
-.PHONY: all build build-release build-debug test clean fmt fmt-check gen_errors
+.PHONY: all build build-release build-debug test clean fmt fmt-check gen
 
 CLANG_FORMAT ?= clang-format
 
@@ -29,5 +29,5 @@ test: build-debug
 clean:
 	rm -rf build CMakeUserPresets.json
 
-gen_errors:
+gen:
 	./bin/gen_errors.py ./conf/errors.in ./src/backend/jstine/core/ErrorCode.hh
